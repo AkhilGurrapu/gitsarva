@@ -75,15 +75,13 @@ export default function TerminalPanel({ suggestedCommand, onCommandExecuted }: T
     }
   };
 
-  // Auto-fill and execute suggested command
+  // Auto-fill suggested command (don't auto-execute)
   useEffect(() => {
     if (suggestedCommand && suggestedCommand !== command) {
       setCommand(suggestedCommand);
-      // Auto-execute the suggested command
-      setTimeout(() => {
-        handleCommand(suggestedCommand);
-        setCommand("");
-      }, 500);
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
     }
   }, [suggestedCommand]);
 

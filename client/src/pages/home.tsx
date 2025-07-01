@@ -58,14 +58,9 @@ export default function Home() {
     }
   }, [isAuthenticated, isLoading, toast]);
 
-  const handleCommandSuggestion = async (command: string) => {
+  const handleCommandSuggestion = (command: string) => {
     setLastCommand(command);
-    // We can trigger the command execution or just highlight it in the terminal
-    try {
-      await executeCommand(command);
-    } catch (error) {
-      console.error("Failed to execute suggested command:", error);
-    }
+    // This will suggest the command in terminal for user to execute manually
   };
 
   const handleStartLesson = (lessonId: number) => {
@@ -74,7 +69,7 @@ export default function Home() {
     if (lessonId === 1) {
       setTimeout(() => {
         setShowInstructions(false);
-        handleCommandSuggestion('git init');
+        setLastCommand('git init'); // This will suggest the command in terminal
       }, 2000);
     }
   };
