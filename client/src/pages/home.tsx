@@ -17,6 +17,7 @@ export default function Home() {
   const { getRepositoryState, executeCommand } = useGitEngine();
   const [lastCommand, setLastCommand] = useState<string>("");
   const [showInstructions, setShowInstructions] = useState(false);
+  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
 
   const repositoryState = getRepositoryState();
 
@@ -67,14 +68,34 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-github-bg dark:bg-background">
       <AppHeader />
+      {/* Mobile Tutorial Sidebar Overlay */}
+      {showMobileSidebar && (
+        <div className="lg:hidden fixed inset-0 z-50 bg-black/50" onClick={() => setShowMobileSidebar(false)}>
+          <div className="absolute left-0 top-16 bottom-0 w-80 bg-github-bg dark:bg-background border-r border-border" onClick={(e) => e.stopPropagation()}>
+            <TutorialSidebar />
+          </div>
+        </div>
+      )}
+
       <div className="flex h-screen pt-16">
-        <TutorialSidebar />
-        <main className="flex-1 flex">
-          <div className="flex-1 flex flex-col">
-            <TerminalPanel 
-              onCommandExecuted={setLastCommand}
-            />
-            <div className="flex-1 border-t border-border">
+        {/* Desktop Tutorial Sidebar */}
+        <div className="hidden lg:block">
+          <TutorialSidebar />
+        </div>
+        
+        {/* Main Content Area - Responsive Grid */}
+        <main className="flex-1 grid grid-cols-1 lg:grid-cols-2 min-h-0">
+          {/* Left Column: Terminal + Command Helper */}
+          <div className="flex flex-col min-h-0 border-r-0 lg:border-r border-border">
+            {/* Terminal Panel */}
+            <div className="flex-1 border-b border-border">
+              <TerminalPanel 
+                onCommandExecuted={setLastCommand}
+              />
+            </div>
+            
+            {/* Command Helper Panel */}
+            <div className="flex-1">
               <InteractiveCommandHelper
                 repositoryState={repositoryState}
                 onSuggestCommand={handleCommandSuggestion}
@@ -82,14 +103,25 @@ export default function Home() {
               />
             </div>
           </div>
-          <InteractiveGitVisualization 
-            repositoryState={repositoryState}
-            onCommandSuggestion={handleCommandSuggestion}
-          />
-          <ExplanationPanel 
-            currentCommand={lastCommand}
-            repositoryState={repositoryState}
-          />
+          
+          {/* Right Column: Git Visualization + Explanations */}
+          <div className="flex flex-col min-h-0">
+            {/* Git Visualization */}
+            <div className="flex-1 border-b border-border">
+              <InteractiveGitVisualization 
+                repositoryState={repositoryState}
+                onCommandSuggestion={handleCommandSuggestion}
+              />
+            </div>
+            
+            {/* Explanation Panel */}
+            <div className="flex-1">
+              <ExplanationPanel 
+                currentCommand={lastCommand}
+                repositoryState={repositoryState}
+              />
+            </div>
+          </div>
         </main>
       </div>
 

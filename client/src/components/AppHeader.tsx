@@ -10,7 +10,7 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { GitBranch, Sun, Moon, ChevronDown, User, LogOut } from "lucide-react";
+import { GitBranch, Sun, Moon, ChevronDown, User, LogOut, Menu } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
 export default function AppHeader() {
