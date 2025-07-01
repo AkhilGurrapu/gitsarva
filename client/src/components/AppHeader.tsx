@@ -13,7 +13,11 @@ import {
 import { GitBranch, Sun, Moon, ChevronDown, User, LogOut, Menu } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
-export default function AppHeader() {
+interface AppHeaderProps {
+  onToggleMobileSidebar?: () => void;
+}
+
+export default function AppHeader({ onToggleMobileSidebar }: AppHeaderProps) {
   const { user } = useAuth();
   const { theme, toggleTheme } = useTheme();
   
@@ -53,6 +57,16 @@ export default function AppHeader() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-4">
+            {/* Mobile Menu Button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="lg:hidden"
+              onClick={onToggleMobileSidebar}
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+            
             <div className="flex items-center space-x-2">
               <GitBranch className="h-6 w-6 text-git-red" />
               <h1 className="text-xl font-bold text-github-dark dark:text-foreground">

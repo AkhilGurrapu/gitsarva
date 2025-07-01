@@ -67,7 +67,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-github-bg dark:bg-background">
-      <AppHeader />
+      <AppHeader onToggleMobileSidebar={() => setShowMobileSidebar(!showMobileSidebar)} />
       {/* Mobile Tutorial Sidebar Overlay */}
       {showMobileSidebar && (
         <div className="lg:hidden fixed inset-0 z-50 bg-black/50" onClick={() => setShowMobileSidebar(false)}>
