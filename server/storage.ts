@@ -166,3 +166,54 @@ export class DatabaseStorage implements IStorage {
 }
 
 export const storage = new DatabaseStorage();
+
+// Seed initial lessons if none exist
+async function seedLessons() {
+  try {
+    const existingLessons = await storage.getAllLessons();
+    if (existingLessons.length === 0) {
+      const initialLessons = [
+        {
+          title: "What is Git?",
+          description: "Learn the basics of version control and why Git is essential for developers",
+          content: "Git is a distributed version control system that tracks changes in your code over time. It allows you to save snapshots of your work, collaborate with others, and manage different versions of your project.",
+          order: 1,
+        },
+        {
+          title: "Repository Basics",
+          description: "Understand what a repository is and how to initialize one",
+          content: "A repository (repo) is a folder that contains your project files and Git's tracking information. Use 'git init' to create a new repository.",
+          order: 2,
+        },
+        {
+          title: "Your First Commit",
+          description: "Learn how to stage files and create your first commit",
+          content: "A commit is a snapshot of your project at a specific point in time. Use 'git add' to stage files and 'git commit' to save changes.",
+          order: 3,
+        },
+        {
+          title: "Understanding Branches",
+          description: "Learn how branches help you work on different features",
+          content: "Branches allow you to work on different features or experiments without affecting the main code. Use 'git branch' and 'git checkout' to manage branches.",
+          order: 4,
+        },
+        {
+          title: "Merging Changes",
+          description: "Combine work from different branches",
+          content: "Merging combines changes from one branch into another. This is how teams integrate different features into the main project.",
+          order: 5,
+        }
+      ];
+
+      for (const lesson of initialLessons) {
+        await storage.createLesson(lesson);
+      }
+      console.log("Seeded initial lessons");
+    }
+  } catch (error) {
+    console.error("Failed to seed lessons:", error);
+  }
+}
+
+// Call seed function
+seedLessons();
