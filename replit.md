@@ -112,6 +112,7 @@ Changelog:
 - July 01, 2025. Major UI redesign: streamlined responsive layout, compact sidebar, cleaner visual hierarchy, reduced overwhelming feel
 - July 01, 2025. Added adjustable/resizable windows for all four panels, collapsible tutorial sidebar, and comprehensive intro walkthrough
 - July 01, 2025. Fixed core synchronization issues: Git commands now properly sync across all components, lesson start buttons work, explanation panel moved to popup menu
+- July 01, 2025. Fixed terminal command clearing: all executed commands now clear from input field, eliminated double execution issues, improved user experience
 ```
 
 ## User Preferences

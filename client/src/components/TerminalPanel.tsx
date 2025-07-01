@@ -73,6 +73,9 @@ export default function TerminalPanel({ suggestedCommand, onCommandExecuted }: T
         timestamp: new Date() 
       });
     }
+    
+    // Always clear the command input after execution
+    setCommand("");
   };
 
   // Auto-fill suggested command (don't auto-execute)
@@ -88,7 +91,6 @@ export default function TerminalPanel({ suggestedCommand, onCommandExecuted }: T
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       handleCommand(command);
-      setCommand("");
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
       if (commandHistory.length > 0) {
