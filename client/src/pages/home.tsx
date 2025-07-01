@@ -7,6 +7,7 @@ import TerminalPanel from "@/components/TerminalPanel";
 import InteractiveGitVisualization from "@/components/InteractiveGitVisualization";
 import ExplanationPanel from "@/components/ExplanationPanel";
 import InstructionModal from "@/components/InstructionModal";
+import InteractiveCommandHelper from "@/components/InteractiveCommandHelper";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { useGitEngine } from "@/lib/gitEngine";
 
@@ -69,7 +70,9 @@ export default function Home() {
       <div className="flex h-screen pt-16">
         <TutorialSidebar />
         <main className="flex-1 flex">
-          <TerminalPanel />
+          <TerminalPanel 
+            onCommandExecuted={setLastCommand}
+          />
           <InteractiveGitVisualization 
             repositoryState={repositoryState}
             onCommandSuggestion={handleCommandSuggestion}

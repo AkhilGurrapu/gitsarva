@@ -10,12 +10,16 @@ interface TerminalLine {
   timestamp: Date;
 }
 
-export default function TerminalPanel() {
+interface TerminalPanelProps {
+  suggestedCommand?: string;
+  onCommandExecuted?: (command: string) => void;
+}
+
+export default function TerminalPanel({ suggestedCommand, onCommandExecuted }: TerminalPanelProps) {
   const [command, setCommand] = useState("");
   const [history, setHistory] = useState<TerminalLine[]>([
     { type: 'output', content: 'Welcome to Git Playground! Type your first Git command below.', timestamp: new Date() },
-    { type: 'command', content: 'git init', timestamp: new Date() },
-    { type: 'output', content: 'Initialized empty Git repository in /playground/.git/', timestamp: new Date() },
+    { type: 'output', content: 'Try starting with: git init', timestamp: new Date() },
   ]);
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
@@ -57,6 +61,11 @@ export default function TerminalPanel() {
       if (result.error) {
         addToHistory({ type: 'error', content: result.error, timestamp: new Date() });
       }
+      
+      // Notify parent of command execution
+      if (onCommandExecuted) {
+        onCommandExecuted(cmd);
+      }
     } catch (error) {
       addToHistory({ 
         type: 'error', 
@@ -65,6 +74,16 @@ export default function TerminalPanel() {
       });
     }
   };
+
+  // Auto-fill suggested command
+  useEffect(() => {
+    if (suggestedCommand && suggestedCommand !== command) {
+      setCommand(suggestedCommand);
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+    }
+  }, [suggestedCommand]);
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {

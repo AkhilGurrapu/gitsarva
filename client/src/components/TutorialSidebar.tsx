@@ -103,11 +103,29 @@ export default function TutorialSidebar() {
     return progress.filter(p => p.completed).length;
   };
 
-  const lessonSteps = [
-    { id: 1, title: "What is Git?", completed: true },
-    { id: 2, title: "Repository basics", completed: true },
-    { id: 3, title: "First commit", completed: false, current: true },
-  ];
+  const currentStep = 1; // This would be dynamic based on user progress
+  
+  const getLessonSteps = (lessonId: number) => {
+    const lessonProgress = getLessonProgress(lessonId);
+    const isCompleted = lessonProgress?.completed;
+    
+    switch (lessonId) {
+      case 1:
+        return [
+          { id: 1, title: "What is Git?", completed: true },
+          { id: 2, title: "Initialize repository", completed: isCompleted },
+          { id: 3, title: "Understand the workflow", completed: false },
+        ];
+      case 2:
+        return [
+          { id: 1, title: "Understanding staging", completed: false },
+          { id: 2, title: "Adding files", completed: false },
+          { id: 3, title: "Making commits", completed: false },
+        ];
+      default:
+        return [];
+    }
+  };
 
   const handleStartChallenge = () => {
     startChallengeMutation.mutate();
@@ -147,11 +165,11 @@ export default function TutorialSidebar() {
             Initialize your first repository and understand Git basics
           </p>
           <div className="space-y-2">
-            {lessonSteps.map((step) => (
+            {getLessonSteps(1).map((step) => (
               <div key={step.id} className="flex items-center space-x-2 text-sm">
                 {step.completed ? (
                   <CheckCircle className="h-3 w-3 text-success-green" />
-                ) : step.current ? (
+                ) : step.id === currentStep ? (
                   <div className="h-3 w-3 border-2 border-github-blue rounded-full" />
                 ) : (
                   <Circle className="h-3 w-3 text-muted-foreground" />
@@ -159,7 +177,7 @@ export default function TutorialSidebar() {
                 <span className={
                   step.completed 
                     ? "text-muted-foreground" 
-                    : step.current 
+                    : step.id === currentStep 
                       ? "text-github-blue font-medium" 
                       : "text-muted-foreground"
                 }>
@@ -182,18 +200,18 @@ export default function TutorialSidebar() {
             Master the power of branches and learn to merge changes
           </p>
           <div className="space-y-2">
-            <div className="flex items-center space-x-2 text-sm">
-              <Circle className="h-3 w-3 text-muted-foreground" />
-              <span className="text-muted-foreground">Creating branches</span>
-            </div>
-            <div className="flex items-center space-x-2 text-sm">
-              <Circle className="h-3 w-3 text-muted-foreground" />
-              <span className="text-muted-foreground">Switching branches</span>
-            </div>
-            <div className="flex items-center space-x-2 text-sm">
-              <Circle className="h-3 w-3 text-muted-foreground" />
-              <span className="text-muted-foreground">Merging changes</span>
-            </div>
+            {getLessonSteps(2).map((step) => (
+              <div key={step.id} className="flex items-center space-x-2 text-sm">
+                {step.completed ? (
+                  <CheckCircle className="h-3 w-3 text-success-green" />
+                ) : (
+                  <Circle className="h-3 w-3 text-muted-foreground" />
+                )}
+                <span className={step.completed ? "text-muted-foreground" : "text-muted-foreground"}>
+                  {step.title}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
 

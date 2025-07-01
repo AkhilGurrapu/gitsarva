@@ -16,7 +16,9 @@ class GitEngine {
   constructor() {
     // Initialize with some sample files for demo
     this.state.files = [
-      { name: 'README.md', content: '# My Project\n\nThis is a sample project.', status: 'untracked' }
+      { name: 'README.md', content: '# My Project\n\nThis is a sample project.', status: 'untracked' },
+      { name: 'index.js', content: 'console.log("Hello, World!");', status: 'untracked' },
+      { name: 'style.css', content: 'body { margin: 0; padding: 20px; }', status: 'untracked' }
     ];
   }
 
