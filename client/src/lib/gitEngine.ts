@@ -29,6 +29,11 @@ class GitEngine {
   private updateWorkingDirectoryStatus() {
     const hasUnstagedChanges = this.state.files.some(f => f.status === 'modified' || f.status === 'untracked');
     this.state.workingDirectory = hasUnstagedChanges ? 'modified' : 'clean';
+    
+    // Update staged files array
+    this.state.stagedFiles = this.state.files
+      .filter(f => f.status === 'staged')
+      .map(f => f.name);
   }
 
   async executeCommand(command: string): Promise<CommandResult> {
@@ -173,10 +178,13 @@ class GitEngine {
     if (target === '.') {
       // Add all files
       const unstaged = this.state.files.filter(f => f.status === 'untracked' || f.status === 'modified');
+      console.log('Before staging - unstaged files:', unstaged.map(f => `${f.name}:${f.status}`));
       unstaged.forEach(f => {
         f.status = 'staged';
       });
       this.updateWorkingDirectoryStatus();
+      console.log('After staging - all files:', this.state.files.map(f => `${f.name}:${f.status}`));
+      console.log('Staged files array:', this.state.stagedFiles);
       return { 
         output: unstaged.length > 0 ? `Added ${unstaged.length} file(s) to staging area.` : 'No files to add.', 
         error: '' 
