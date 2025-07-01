@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import AppHeader from "@/components/AppHeader";
 import CompactTutorialSidebar from "@/components/CompactTutorialSidebar";
 import TerminalPanel from "@/components/TerminalPanel";
@@ -8,6 +9,7 @@ import InteractiveGitVisualization from "@/components/InteractiveGitVisualizatio
 import ExplanationPanel from "@/components/ExplanationPanel";
 import InstructionModal from "@/components/InstructionModal";
 import InteractiveCommandHelper from "@/components/InteractiveCommandHelper";
+import IntroWalkthrough from "@/components/IntroWalkthrough";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { useGitEngine } from "@/lib/gitEngine";
 
@@ -18,6 +20,8 @@ export default function Home() {
   const [lastCommand, setLastCommand] = useState<string>("");
   const [showInstructions, setShowInstructions] = useState(false);
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
+  const [showIntroWalkthrough, setShowIntroWalkthrough] = useState(false);
+  const [tutorialCollapsed, setTutorialCollapsed] = useState(false);
 
   const repositoryState = getRepositoryState();
 
@@ -78,51 +82,84 @@ export default function Home() {
       )}
 
       <div className="flex h-screen pt-16">
-        {/* Desktop Tutorial Sidebar */}
-        <div className="hidden lg:block">
-          <CompactTutorialSidebar />
-        </div>
-        
-        {/* Main Content Area - Clean Split Layout */}
-        <main className="flex-1 flex flex-col lg:flex-row min-h-0">
-          {/* Interactive Terminal & Commands Section */}
-          <div className="flex-1 flex flex-col border-r-0 lg:border-r border-border bg-white dark:bg-card">
-            {/* Enhanced Terminal Panel with embedded command suggestions */}
-            <div className="flex-1 min-h-0">
-              <TerminalPanel 
-                onCommandExecuted={setLastCommand}
-              />
-            </div>
-            
-            {/* Compact Command Helper */}
-            <div className="h-80 border-t border-border">
-              <InteractiveCommandHelper
-                repositoryState={repositoryState}
-                onSuggestCommand={handleCommandSuggestion}
-                lastCommand={lastCommand}
-              />
-            </div>
-          </div>
+        <ResizablePanelGroup direction="horizontal">
+          {/* Collapsible Tutorial Sidebar */}
+          <ResizablePanel
+            defaultSize={tutorialCollapsed ? 5 : 25}
+            minSize={5}
+            maxSize={40}
+            className="hidden lg:block"
+          >
+            <CompactTutorialSidebar 
+              collapsed={tutorialCollapsed}
+              onToggleCollapse={() => setTutorialCollapsed(!tutorialCollapsed)}
+              onStartWalkthrough={() => setShowIntroWalkthrough(true)}
+            />
+          </ResizablePanel>
           
-          {/* Visual Learning Section */}
-          <div className="flex-1 flex flex-col bg-github-bg dark:bg-background">
-            {/* Git Visualization with larger space */}
-            <div className="flex-1 min-h-0 p-4">
-              <InteractiveGitVisualization 
-                repositoryState={repositoryState}
-                onCommandSuggestion={handleCommandSuggestion}
-              />
-            </div>
-            
-            {/* Contextual Explanation Panel */}
-            <div className="h-64 border-t border-border bg-white dark:bg-card">
-              <ExplanationPanel 
-                currentCommand={lastCommand}
-                repositoryState={repositoryState}
-              />
-            </div>
-          </div>
-        </main>
+          {!tutorialCollapsed && <ResizableHandle withHandle />}
+          
+          {/* Main Content Area - Resizable Panels */}
+          <ResizablePanel defaultSize={tutorialCollapsed ? 95 : 75} minSize={60}>
+            <ResizablePanelGroup direction="horizontal">
+              {/* Left Panel: Terminal & Command Helper */}
+              <ResizablePanel defaultSize={50} minSize={30}>
+                <ResizablePanelGroup direction="vertical">
+                  {/* Terminal Panel */}
+                  <ResizablePanel defaultSize={60} minSize={30}>
+                    <div className="h-full bg-white dark:bg-card">
+                      <TerminalPanel 
+                        onCommandExecuted={setLastCommand}
+                      />
+                    </div>
+                  </ResizablePanel>
+                  
+                  <ResizableHandle withHandle />
+                  
+                  {/* Command Helper Panel */}
+                  <ResizablePanel defaultSize={40} minSize={20}>
+                    <div className="h-full border-t border-border">
+                      <InteractiveCommandHelper
+                        repositoryState={repositoryState}
+                        onSuggestCommand={handleCommandSuggestion}
+                        lastCommand={lastCommand}
+                      />
+                    </div>
+                  </ResizablePanel>
+                </ResizablePanelGroup>
+              </ResizablePanel>
+              
+              <ResizableHandle withHandle />
+              
+              {/* Right Panel: Git Visualization & Explanations */}
+              <ResizablePanel defaultSize={50} minSize={30}>
+                <ResizablePanelGroup direction="vertical">
+                  {/* Git Visualization Panel */}
+                  <ResizablePanel defaultSize={65} minSize={30}>
+                    <div className="h-full bg-github-bg dark:bg-background p-4">
+                      <InteractiveGitVisualization 
+                        repositoryState={repositoryState}
+                        onCommandSuggestion={handleCommandSuggestion}
+                      />
+                    </div>
+                  </ResizablePanel>
+                  
+                  <ResizableHandle withHandle />
+                  
+                  {/* Explanation Panel */}
+                  <ResizablePanel defaultSize={35} minSize={20}>
+                    <div className="h-full border-t border-border bg-white dark:bg-card">
+                      <ExplanationPanel 
+                        currentCommand={lastCommand}
+                        repositoryState={repositoryState}
+                      />
+                    </div>
+                  </ResizablePanel>
+                </ResizablePanelGroup>
+              </ResizablePanel>
+            </ResizablePanelGroup>
+          </ResizablePanel>
+        </ResizablePanelGroup>
       </div>
 
       <InstructionModal
@@ -137,6 +174,11 @@ export default function Home() {
           "You'll see everything visualized in real-time!"
         ]}
         onNext={() => handleCommandSuggestion('git init')}
+      />
+
+      <IntroWalkthrough
+        isOpen={showIntroWalkthrough}
+        onClose={() => setShowIntroWalkthrough(false)}
       />
     </div>
   );
