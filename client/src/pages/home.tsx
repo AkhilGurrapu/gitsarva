@@ -12,6 +12,8 @@ import InteractiveCommandHelper from "@/components/InteractiveCommandHelper";
 import IntroWalkthrough from "@/components/IntroWalkthrough";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { useGitEngine } from "@/lib/gitEngine";
+import { Lightbulb } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export default function Home() {
   const { toast } = useToast();
@@ -32,6 +34,7 @@ export default function Home() {
   }, [isAuthenticated, isLoading]);
 
   const repositoryState = getRepositoryState();
+  const [showExplanationPanel, setShowExplanationPanel] = useState(false);
 
   // Show welcome instructions for new users
   useEffect(() => {
@@ -144,31 +147,23 @@ export default function Home() {
               
               <ResizableHandle withHandle />
               
-              {/* Right Panel: Git Visualization & Explanations */}
+              {/* Right Panel: Git Visualization with floating explanation button */}
               <ResizablePanel defaultSize={50} minSize={30}>
-                <ResizablePanelGroup direction="vertical">
-                  {/* Git Visualization Panel */}
-                  <ResizablePanel defaultSize={65} minSize={30}>
-                    <div className="h-full bg-github-bg dark:bg-background p-4">
-                      <InteractiveGitVisualization 
-                        repositoryState={repositoryState}
-                        onCommandSuggestion={handleCommandSuggestion}
-                      />
-                    </div>
-                  </ResizablePanel>
+                <div className="h-full bg-github-bg dark:bg-background p-4 relative">
+                  <InteractiveGitVisualization 
+                    repositoryState={repositoryState}
+                    onCommandSuggestion={handleCommandSuggestion}
+                  />
                   
-                  <ResizableHandle withHandle />
-                  
-                  {/* Explanation Panel */}
-                  <ResizablePanel defaultSize={35} minSize={20}>
-                    <div className="h-full border-t border-border bg-white dark:bg-card">
-                      <ExplanationPanel 
-                        currentCommand={lastCommand}
-                        repositoryState={repositoryState}
-                      />
-                    </div>
-                  </ResizablePanel>
-                </ResizablePanelGroup>
+                  {/* Floating explanation button */}
+                  <button
+                    onClick={() => setShowExplanationPanel(true)}
+                    className="absolute top-6 right-6 bg-github-blue hover:bg-github-blue/90 text-white p-3 rounded-full shadow-lg transition-colors z-10"
+                    title="Learn & Understand"
+                  >
+                    <Lightbulb className="h-5 w-5" />
+                  </button>
+                </div>
               </ResizablePanel>
             </ResizablePanelGroup>
           </ResizablePanel>

@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { GitCommit, RepositoryState, GitFile, CommandResult } from "./gitTypes";
 
 // Mock Git engine for learning purposes
@@ -388,11 +388,42 @@ class GitEngine {
 }
 
 // React hook for using the Git engine
+// Global git engine instance to maintain state across components
+let globalGitEngine: GitEngine | null = null;
+let stateUpdateListeners: Array<() => void> = [];
+
+function getGlobalGitEngine(): GitEngine {
+  if (!globalGitEngine) {
+    globalGitEngine = new GitEngine();
+  }
+  return globalGitEngine;
+}
+
+function notifyStateUpdate() {
+  stateUpdateListeners.forEach(listener => listener());
+}
+
 export function useGitEngine() {
-  const [engine] = useState(() => new GitEngine());
+  const [, forceUpdate] = useState({});
+  const engine = getGlobalGitEngine();
+
+  // Force re-render when state updates
+  const triggerUpdate = useCallback(() => {
+    forceUpdate({});
+  }, []);
+
+  // Subscribe to state updates
+  useEffect(() => {
+    stateUpdateListeners.push(triggerUpdate);
+    return () => {
+      stateUpdateListeners = stateUpdateListeners.filter(listener => listener !== triggerUpdate);
+    };
+  }, [triggerUpdate]);
 
   const executeCommand = useCallback(async (command: string): Promise<CommandResult> => {
-    return engine.executeCommand(command);
+    const result = await engine.executeCommand(command);
+    notifyStateUpdate(); // Notify all components of state change
+    return result;
   }, [engine]);
 
   const getCurrentBranch = useCallback((): string | null => {
