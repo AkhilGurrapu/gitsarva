@@ -43,11 +43,14 @@ Git Playground is a progressive web app (PWA) designed to teach Git and GitHub t
 - **Sessions table**: Required for Replit Auth session management
 
 ### UI Components
-- **App Header**: User profile, progress tracking, theme toggle
-- **Tutorial Sidebar**: Lesson navigation and progress indicators
-- **Terminal Panel**: Interactive Git command interface
-- **Visualization Panel**: Git tree and repository state display
-- **Instruction Modals**: Step-by-step tutorial guidance
+- **App Header**: User profile, progress tracking, theme toggle, walkthrough access
+- **Compact Tutorial Sidebar**: Collapsible lesson navigation with progress indicators
+- **Terminal Panel**: Interactive Git command interface with resizable layout
+- **Visualization Panel**: Git tree and repository state display with resizable layout
+- **Command Helper Panel**: Context-aware Git command suggestions
+- **Explanation Panel**: Real-time concept explanations and tips
+- **Intro Walkthrough**: Guided tour of all interface sections
+- **Resizable Layout**: All four panels support drag-to-resize functionality
 
 ### Git Learning Engine
 - Mock Git operations for safe learning environment
@@ -107,6 +110,7 @@ Changelog:
 - July 01, 2025. Initial setup with basic authentication and Git engine
 - July 01, 2025. Enhanced interactivity with visual explanations, smart command suggestions, and improved user experience
 - July 01, 2025. Major UI redesign: streamlined responsive layout, compact sidebar, cleaner visual hierarchy, reduced overwhelming feel
+- July 01, 2025. Added adjustable/resizable windows for all four panels, collapsible tutorial sidebar, and comprehensive intro walkthrough
 ```
 
 ## User Preferences

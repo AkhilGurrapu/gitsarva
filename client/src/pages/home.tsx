@@ -22,6 +22,14 @@ export default function Home() {
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
   const [showIntroWalkthrough, setShowIntroWalkthrough] = useState(false);
   const [tutorialCollapsed, setTutorialCollapsed] = useState(false);
+  
+  // Show walkthrough for first-time users
+  useEffect(() => {
+    const hasSeenWalkthrough = localStorage.getItem('git-playground-walkthrough-seen');
+    if (!hasSeenWalkthrough && isAuthenticated && !isLoading) {
+      setShowIntroWalkthrough(true);
+    }
+  }, [isAuthenticated, isLoading]);
 
   const repositoryState = getRepositoryState();
 

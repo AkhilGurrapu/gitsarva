@@ -115,6 +115,7 @@ export default function IntroWalkthrough({ isOpen, onClose }: IntroWalkthroughPr
   };
 
   const handleFinish = () => {
+    localStorage.setItem('git-playground-walkthrough-seen', 'true');
     onClose();
   };
 
