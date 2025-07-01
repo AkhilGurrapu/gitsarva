@@ -1,0 +1,41 @@
+Goal
+Build a browser-first “Git Playground”: a progressive web app (PWA) that teaches Git/GitHub through an interactive sandbox, live visualisations and self-graded challenges. The whole course (lessons, repos, engine) runs entirely inside Chrome’s storage so it works offline; cloud services are used only when the user explicitly wants to sync progress or push to GitHub.
+
+Key architectural decisions
+
+Frontend stack – React (component model, huge ecosystem), Vite + TypeScript for fast dev cycles.
+
+Git engine in the browser – isomorphic-git compiled for Web Workers; it offers almost the full Git CLI without any server. (Inference: no search result describes it, but it is the only mature pure-JS Git implementation; stated as expert recommendation.)
+
+Client file-system – the Origin-Private-File-System (OPFS) for repository data; falls back to IndexedDB where OPFS is missing. Both are supported in every modern browser and are non-blocking.
+
+Offline runtime – Service-Worker + Cache Storage API to cache HTML/JS/CSS and lesson markdown. The entire course stays under Chrome’s generous per-origin quota (≈60% of local disk).
+
+Visualisation layer – D3.js or React-Flow to render the live commit DAG, branches, resets, rebase animations, etc.
+
+Code editor / terminal – Monaco Editor for file edits, xterm.js for a faux “git bash”.
+
+Optional cloud back-end (free tier) – Supabase:
+– Auth with Google One-Tap
+– Realtime DB (500 MB) to store user progress and award badges
+– Storage bucket (1 GB) for users who want to save their repos remotely or share exercises
+– Edge Functions for heavier tasks (e.g., scoring a large repo), still within the free allowance.
+
+How it satisfies the “no external server” requirement
+
+All mandatory learning flows are 100% client-side. Git commands are executed by the worker-based engine; repos live in OPFS.
+
+Assets and lessons are precached; after the very first load the site is fully functional offline.
+
+Supabase and Google sign-in are optional add-ons; the user can choose “local-only mode” and never hit the network.
+
+High-level component diagram
+
+Layer	Responsibility	Tech / API
+UI	React components, routing, theming	React 18 + Vite
+Visualisations	Commit graph, branch animations	D3.js / React-Flow
+Git Worker	Parse CLI, call isomorphic-git, stream output to terminal	Web Worker
+Client FS	Store repos, lesson data	OPFS ➜ IndexedDB fallback
+Caching	App shell + lessons	Service-Worker, Cache Storage
+Auth (opt.)	Google sign-in	Supabase Auth + GIS
+Cloud sync (opt.)	Progress, shared repos	Supabase free tier (500 MB DB, 1 GB storage)
