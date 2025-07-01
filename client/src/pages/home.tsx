@@ -70,9 +70,18 @@ export default function Home() {
       <div className="flex h-screen pt-16">
         <TutorialSidebar />
         <main className="flex-1 flex">
-          <TerminalPanel 
-            onCommandExecuted={setLastCommand}
-          />
+          <div className="flex-1 flex flex-col">
+            <TerminalPanel 
+              onCommandExecuted={setLastCommand}
+            />
+            <div className="flex-1 border-t border-border">
+              <InteractiveCommandHelper
+                repositoryState={repositoryState}
+                onSuggestCommand={handleCommandSuggestion}
+                lastCommand={lastCommand}
+              />
+            </div>
+          </div>
           <InteractiveGitVisualization 
             repositoryState={repositoryState}
             onCommandSuggestion={handleCommandSuggestion}
