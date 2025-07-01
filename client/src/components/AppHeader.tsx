@@ -10,14 +10,15 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { GitBranch, Sun, Moon, ChevronDown, User, LogOut, Menu } from "lucide-react";
+import { GitBranch, Sun, Moon, ChevronDown, User, LogOut, Menu, HelpCircle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
 interface AppHeaderProps {
   onToggleMobileSidebar?: () => void;
+  onStartWalkthrough?: () => void;
 }
 
-export default function AppHeader({ onToggleMobileSidebar }: AppHeaderProps) {
+export default function AppHeader({ onToggleMobileSidebar, onStartWalkthrough }: AppHeaderProps) {
   const { user } = useAuth();
   const { theme, toggleTheme } = useTheme();
   
@@ -98,6 +99,19 @@ export default function AppHeader({ onToggleMobileSidebar }: AppHeaderProps) {
                 {Math.round(progressPercentage)}%
               </span>
             </div>
+            
+            {/* Walkthrough Button */}
+            {onStartWalkthrough && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onStartWalkthrough}
+                className="hidden md:flex"
+                title="Take Interface Tour"
+              >
+                <HelpCircle className="h-4 w-4" />
+              </Button>
+            )}
             
             {/* Theme Toggle */}
             <Button

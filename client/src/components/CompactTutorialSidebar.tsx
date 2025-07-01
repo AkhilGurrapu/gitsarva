@@ -10,7 +10,10 @@ import {
   ChevronDown,
   BookOpen,
   Play,
-  Star
+  Star,
+  ChevronLeft,
+  Menu,
+  HelpCircle
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
@@ -27,7 +30,17 @@ interface UserProgress {
   completedAt?: string;
 }
 
-export default function CompactTutorialSidebar() {
+interface CompactTutorialSidebarProps {
+  collapsed?: boolean;
+  onToggleCollapse?: () => void;
+  onStartWalkthrough?: () => void;
+}
+
+export default function CompactTutorialSidebar({ 
+  collapsed = false, 
+  onToggleCollapse,
+  onStartWalkthrough 
+}: CompactTutorialSidebarProps) {
   const [expandedLesson, setExpandedLesson] = useState<number | null>(1);
   
   const { data: lessons = [] } = useQuery<Lesson[]>({
@@ -67,15 +80,67 @@ export default function CompactTutorialSidebar() {
     return stepMap[lessonId] || [];
   };
 
+  if (collapsed) {
+    return (
+      <div className="w-12 h-full bg-white dark:bg-card border-r border-border flex flex-col items-center py-4 space-y-4">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onToggleCollapse}
+          className="p-2"
+          title="Expand Learning Hub"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+        
+        <div className="rotate-90 text-xs text-muted-foreground whitespace-nowrap">
+          Learn
+        </div>
+        
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onStartWalkthrough}
+          className="p-2"
+          title="Take Tour"
+        >
+          <HelpCircle className="h-4 w-4" />
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="w-80 h-full bg-white dark:bg-card border-r border-border overflow-y-auto">
       {/* Header */}
       <div className="p-4 border-b border-border/50">
-        <div className="flex items-center space-x-2 mb-3">
-          <BookOpen className="h-5 w-5 text-github-blue" />
-          <h2 className="font-semibold text-github-dark dark:text-foreground">
-            Git Mastery Path
-          </h2>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center space-x-2">
+            <BookOpen className="h-5 w-5 text-github-blue" />
+            <h2 className="font-semibold text-github-dark dark:text-foreground">
+              Git Mastery Path
+            </h2>
+          </div>
+          <div className="flex items-center space-x-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onStartWalkthrough}
+              className="p-1.5"
+              title="Take Tour"
+            >
+              <HelpCircle className="h-3.5 w-3.5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onToggleCollapse}
+              className="p-1.5"
+              title="Collapse Panel"
+            >
+              <ChevronLeft className="h-3.5 w-3.5" />
+            </Button>
+          </div>
         </div>
         
         <div className="space-y-2">

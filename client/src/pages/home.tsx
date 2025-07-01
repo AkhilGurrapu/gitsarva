@@ -71,12 +71,17 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-github-bg dark:bg-background">
-      <AppHeader onToggleMobileSidebar={() => setShowMobileSidebar(!showMobileSidebar)} />
+      <AppHeader 
+        onToggleMobileSidebar={() => setShowMobileSidebar(!showMobileSidebar)}
+        onStartWalkthrough={() => setShowIntroWalkthrough(true)}
+      />
       {/* Mobile Tutorial Sidebar Overlay */}
       {showMobileSidebar && (
         <div className="lg:hidden fixed inset-0 z-50 bg-black/50" onClick={() => setShowMobileSidebar(false)}>
           <div className="absolute left-0 top-16 bottom-0 w-80 bg-github-bg dark:bg-background border-r border-border" onClick={(e) => e.stopPropagation()}>
-            <CompactTutorialSidebar />
+            <CompactTutorialSidebar 
+              onStartWalkthrough={() => setShowIntroWalkthrough(true)}
+            />
           </div>
         </div>
       )}
