@@ -139,6 +139,7 @@ export default function Home() {
                     <div className="h-full bg-white dark:bg-card">
                       <TerminalPanel 
                         onCommandExecuted={setLastCommand}
+                        suggestedCommand={lastCommand}
                       />
                     </div>
                   </ResizablePanel>
