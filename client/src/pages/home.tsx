@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import AppHeader from "@/components/AppHeader";
-import TutorialSidebar from "@/components/TutorialSidebar";
+import CompactTutorialSidebar from "@/components/CompactTutorialSidebar";
 import TerminalPanel from "@/components/TerminalPanel";
 import InteractiveGitVisualization from "@/components/InteractiveGitVisualization";
 import ExplanationPanel from "@/components/ExplanationPanel";
@@ -72,7 +72,7 @@ export default function Home() {
       {showMobileSidebar && (
         <div className="lg:hidden fixed inset-0 z-50 bg-black/50" onClick={() => setShowMobileSidebar(false)}>
           <div className="absolute left-0 top-16 bottom-0 w-80 bg-github-bg dark:bg-background border-r border-border" onClick={(e) => e.stopPropagation()}>
-            <TutorialSidebar />
+            <CompactTutorialSidebar />
           </div>
         </div>
       )}
@@ -80,22 +80,22 @@ export default function Home() {
       <div className="flex h-screen pt-16">
         {/* Desktop Tutorial Sidebar */}
         <div className="hidden lg:block">
-          <TutorialSidebar />
+          <CompactTutorialSidebar />
         </div>
         
-        {/* Main Content Area - Responsive Grid */}
-        <main className="flex-1 grid grid-cols-1 lg:grid-cols-2 min-h-0">
-          {/* Left Column: Terminal + Command Helper */}
-          <div className="flex flex-col min-h-0 border-r-0 lg:border-r border-border">
-            {/* Terminal Panel */}
-            <div className="flex-1 border-b border-border">
+        {/* Main Content Area - Clean Split Layout */}
+        <main className="flex-1 flex flex-col lg:flex-row min-h-0">
+          {/* Interactive Terminal & Commands Section */}
+          <div className="flex-1 flex flex-col border-r-0 lg:border-r border-border bg-white dark:bg-card">
+            {/* Enhanced Terminal Panel with embedded command suggestions */}
+            <div className="flex-1 min-h-0">
               <TerminalPanel 
                 onCommandExecuted={setLastCommand}
               />
             </div>
             
-            {/* Command Helper Panel */}
-            <div className="flex-1">
+            {/* Compact Command Helper */}
+            <div className="h-80 border-t border-border">
               <InteractiveCommandHelper
                 repositoryState={repositoryState}
                 onSuggestCommand={handleCommandSuggestion}
@@ -104,18 +104,18 @@ export default function Home() {
             </div>
           </div>
           
-          {/* Right Column: Git Visualization + Explanations */}
-          <div className="flex flex-col min-h-0">
-            {/* Git Visualization */}
-            <div className="flex-1 border-b border-border">
+          {/* Visual Learning Section */}
+          <div className="flex-1 flex flex-col bg-github-bg dark:bg-background">
+            {/* Git Visualization with larger space */}
+            <div className="flex-1 min-h-0 p-4">
               <InteractiveGitVisualization 
                 repositoryState={repositoryState}
                 onCommandSuggestion={handleCommandSuggestion}
               />
             </div>
             
-            {/* Explanation Panel */}
-            <div className="flex-1">
+            {/* Contextual Explanation Panel */}
+            <div className="h-64 border-t border-border bg-white dark:bg-card">
               <ExplanationPanel 
                 currentCommand={lastCommand}
                 repositoryState={repositoryState}

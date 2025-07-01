@@ -106,10 +106,12 @@ Git Playground is a progressive web app (PWA) designed to teach Git and GitHub t
 Changelog:
 - July 01, 2025. Initial setup with basic authentication and Git engine
 - July 01, 2025. Enhanced interactivity with visual explanations, smart command suggestions, and improved user experience
+- July 01, 2025. Major UI redesign: streamlined responsive layout, compact sidebar, cleaner visual hierarchy, reduced overwhelming feel
 ```
 
 ## User Preferences
 
 ```
 Preferred communication style: Simple, everyday language.
+Design preference: Clean, non-overwhelming UI with responsive design that maintains all features but feels more elegant and less cluttered.
 ```
