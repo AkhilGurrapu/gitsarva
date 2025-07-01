@@ -68,6 +68,17 @@ export default function Home() {
     }
   };
 
+  const handleStartLesson = (lessonId: number) => {
+    setShowInstructions(true);
+    // Start with the first command for lesson 1
+    if (lessonId === 1) {
+      setTimeout(() => {
+        setShowInstructions(false);
+        handleCommandSuggestion('git init');
+      }, 2000);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-github-bg dark:bg-background">
@@ -92,6 +103,7 @@ export default function Home() {
           <div className="absolute left-0 top-16 bottom-0 w-80 bg-github-bg dark:bg-background border-r border-border" onClick={(e) => e.stopPropagation()}>
             <CompactTutorialSidebar 
               onStartWalkthrough={() => setShowIntroWalkthrough(true)}
+              onStartLesson={handleStartLesson}
             />
           </div>
         </div>
@@ -110,6 +122,7 @@ export default function Home() {
               collapsed={tutorialCollapsed}
               onToggleCollapse={() => setTutorialCollapsed(!tutorialCollapsed)}
               onStartWalkthrough={() => setShowIntroWalkthrough(true)}
+              onStartLesson={handleStartLesson}
             />
           </ResizablePanel>
           
@@ -188,6 +201,22 @@ export default function Home() {
         isOpen={showIntroWalkthrough}
         onClose={() => setShowIntroWalkthrough(false)}
       />
+
+      {/* Explanation Panel as Popup */}
+      <Dialog open={showExplanationPanel} onOpenChange={setShowExplanationPanel}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <Lightbulb className="h-5 w-5 text-github-blue" />
+              <span>Learn & Understand</span>
+            </DialogTitle>
+          </DialogHeader>
+          <ExplanationPanel 
+            currentCommand={lastCommand}
+            repositoryState={repositoryState}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

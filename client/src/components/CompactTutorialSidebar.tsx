@@ -34,12 +34,14 @@ interface CompactTutorialSidebarProps {
   collapsed?: boolean;
   onToggleCollapse?: () => void;
   onStartWalkthrough?: () => void;
+  onStartLesson?: (lessonId: number) => void;
 }
 
 export default function CompactTutorialSidebar({ 
   collapsed = false, 
   onToggleCollapse,
-  onStartWalkthrough 
+  onStartWalkthrough,
+  onStartLesson
 }: CompactTutorialSidebarProps) {
   const [expandedLesson, setExpandedLesson] = useState<number | null>(1);
   
@@ -222,16 +224,15 @@ export default function CompactTutorialSidebar({
                     </div>
                   ))}
                   
-                  {lesson.id === 1 && (
-                    <Button 
-                      size="sm" 
-                      className="w-full mt-3 text-xs" 
-                      variant={lessonProgress?.completed ? "outline" : "default"}
-                    >
-                      <Play className="h-3 w-3 mr-1" />
-                      {lessonProgress?.completed ? "Review" : "Start Lesson"}
-                    </Button>
-                  )}
+                  <Button 
+                    size="sm" 
+                    className="w-full mt-3 text-xs" 
+                    variant={lessonProgress?.completed ? "outline" : "default"}
+                    onClick={() => onStartLesson?.(lesson.id)}
+                  >
+                    <Play className="h-3 w-3 mr-1" />
+                    {lessonProgress?.completed ? "Review" : "Start Lesson"}
+                  </Button>
                 </CardContent>
               )}
             </Card>
