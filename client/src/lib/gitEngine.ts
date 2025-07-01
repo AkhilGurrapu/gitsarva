@@ -43,29 +43,43 @@ class GitEngine {
     }
 
     try {
+      let result: CommandResult;
       switch (subcommand) {
         case 'init':
-          return this.init();
+          result = this.init();
+          break;
         case 'status':
-          return this.status();
+          result = this.status();
+          break;
         case 'add':
-          return this.add(args);
+          result = this.add(args);
+          break;
         case 'commit':
-          return this.commit(args);
+          result = this.commit(args);
+          break;
         case 'branch':
-          return this.branch(args);
+          result = this.branch(args);
+          break;
         case 'checkout':
-          return this.checkout(args);
+          result = this.checkout(args);
+          break;
         case 'log':
-          return this.log(args);
+          result = this.log(args);
+          break;
         case 'diff':
-          return this.diff(args);
+          result = this.diff(args);
+          break;
         default:
-          return { 
+          result = { 
             output: '', 
             error: `Unknown git command: ${subcommand}. Try 'git status' or 'git help'.` 
           };
       }
+      
+      // Notify all components about state changes
+      notifyStateUpdate();
+      return result;
+      
     } catch (error) {
       return { 
         output: '', 

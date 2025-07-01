@@ -147,145 +147,119 @@ export default function ExplanationPanel({ currentCommand, repositoryState }: Ex
   const status = getCurrentStatus();
 
   return (
-    <div className="w-80 bg-white dark:bg-card border-l border-border flex flex-col">
-      <div className="p-4 border-b border-border">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center space-x-2">
-            <BookOpen className="h-5 w-5 text-github-blue" />
-            <h2 className="text-lg font-semibold text-github-dark dark:text-foreground">
-              Learn & Understand
-            </h2>
+    <div className="w-full max-w-2xl mx-auto bg-white dark:bg-card rounded-lg border border-border shadow-lg max-h-[80vh] overflow-hidden flex flex-col">
+      {/* Header */}
+      <div className="p-4 sm:p-6 border-b border-border bg-gradient-to-r from-github-blue/10 to-blue-500/10 dark:from-github-blue/5 dark:to-blue-500/5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-github-blue/10 dark:bg-github-blue/20 rounded-full">
+              <Lightbulb className="h-5 w-5 text-github-blue" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-github-dark dark:text-foreground">
+                Learn & Understand
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Master Git concepts with interactive explanations
+              </p>
+            </div>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="p-1"
-          >
-            <ArrowRight className={`h-4 w-4 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
-          </Button>
         </div>
+      </div>
 
-        {/* Current Status */}
-        {status && (
-          <Card className="mb-4 bg-github-bg dark:bg-muted/50">
-            <CardContent className="p-3">
-              <div className="flex items-center space-x-2">
-                <status.icon className={`h-4 w-4 ${status.color}`} />
-                <div>
-                  <div className="text-sm font-medium text-github-dark dark:text-foreground">
-                    {status.phase}
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    {status.description}
-                  </div>
-                </div>
+      {/* Current Status */}
+      {status && (
+        <div className="p-4 sm:p-6 bg-gray-50 dark:bg-muted/30 border-b border-border">
+          <div className="flex items-center space-x-3">
+            <status.icon className={`h-5 w-5 ${status.color}`} />
+            <div>
+              <div className="text-sm font-semibold text-github-dark dark:text-foreground">
+                {status.phase}
               </div>
-            </CardContent>
-          </Card>
-        )}
+              <div className="text-xs text-muted-foreground">
+                {status.description}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
-        {/* Concept Selection */}
-        <div className="grid grid-cols-2 gap-2">
+      {/* Concept Selection */}
+      <div className="p-4 sm:p-6 border-b border-border">
+        <h3 className="text-sm font-semibold text-github-dark dark:text-foreground mb-3">
+          Choose a Git concept to explore:
+        </h3>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           {gitConcepts.map(concept => (
             <Button
               key={concept.id}
               variant={selectedConcept === concept.id ? "default" : "outline"}
               size="sm"
               onClick={() => setSelectedConcept(concept.id)}
-              className="text-xs h-8"
+              className="text-xs h-9 px-3 justify-start"
             >
-              {concept.title.split(' ')[0]}
+              {concept.title}
             </Button>
           ))}
         </div>
       </div>
 
-      {isExpanded && selectedExplanation && (
-        <div className="flex-1 overflow-y-auto p-4">
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-github-dark dark:text-foreground flex items-center space-x-2">
-                <Lightbulb className="h-5 w-5 text-yellow-500" />
-                <span>{selectedExplanation.title}</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-sm text-muted-foreground">
+      {/* Content Area */}
+      {selectedExplanation && (
+        <div className="flex-1 overflow-y-auto">
+          <div className="p-4 sm:p-6 space-y-6">
+            {/* Title and Description */}
+            <div>
+              <h3 className="text-lg font-bold text-github-dark dark:text-foreground mb-2">
+                {selectedExplanation.title}
+              </h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
                 {selectedExplanation.description}
               </p>
+            </div>
 
-              {/* Commands */}
-              <div>
-                <h4 className="text-sm font-medium text-github-dark dark:text-foreground mb-2">
-                  Related Commands:
-                </h4>
-                <div className="flex flex-wrap gap-1">
-                  {selectedExplanation.commands.map(cmd => (
-                    <Badge key={cmd} variant="secondary" className="text-xs font-mono">
-                      {cmd}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-
-              {/* Example */}
-              <div>
-                <h4 className="text-sm font-medium text-github-dark dark:text-foreground mb-2">
-                  Example:
-                </h4>
-                <div className="bg-github-dark text-git-green p-3 rounded text-xs font-mono">
-                  $ {selectedExplanation.example}
-                </div>
-              </div>
-
-              {/* Tips */}
-              <div>
-                <h4 className="text-sm font-medium text-github-dark dark:text-foreground mb-2">
-                  💡 Tips:
-                </h4>
-                <ul className="space-y-1">
-                  {selectedExplanation.tips.map((tip, index) => (
-                    <li key={index} className="text-xs text-muted-foreground flex items-start space-x-2">
-                      <span className="text-github-blue mt-1">•</span>
-                      <span>{tip}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Quick Actions */}
-          <Card className="mt-4">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm text-github-dark dark:text-foreground">
-                Try These Commands:
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
+            {/* Commands */}
+            <div className="bg-gray-50 dark:bg-muted/50 rounded-lg p-4">
+              <h4 className="text-sm font-semibold text-github-dark dark:text-foreground mb-3 flex items-center space-x-2">
+                <Target className="h-4 w-4" />
+                <span>Related Commands</span>
+              </h4>
+              <div className="flex flex-wrap gap-2">
                 {selectedExplanation.commands.map(cmd => (
-                  <div key={cmd} className="flex items-center justify-between text-xs">
-                    <code className="bg-github-bg dark:bg-muted px-2 py-1 rounded font-mono">
-                      {cmd}
-                    </code>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 px-2 text-xs"
-                      onClick={() => {
-                        // Copy command to clipboard or trigger it
-                        navigator.clipboard.writeText(cmd);
-                      }}
-                    >
-                      Copy
-                    </Button>
-                  </div>
+                  <Badge key={cmd} variant="secondary" className="text-xs font-mono px-2 py-1">
+                    {cmd}
+                  </Badge>
                 ))}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+
+            {/* Example */}
+            <div className="bg-github-dark text-git-green rounded-lg p-4">
+              <h4 className="text-sm font-semibold text-white mb-3 flex items-center space-x-2">
+                <FileText className="h-4 w-4" />
+                <span>Example Usage</span>
+              </h4>
+              <div className="text-sm font-mono">
+                $ {selectedExplanation.example}
+              </div>
+            </div>
+
+            {/* Tips */}
+            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+              <h4 className="text-sm font-semibold text-github-dark dark:text-foreground mb-3 flex items-center space-x-2">
+                <Lightbulb className="h-4 w-4 text-yellow-500" />
+                <span>Pro Tips</span>
+              </h4>
+              <ul className="space-y-2">
+                {selectedExplanation.tips.map((tip, index) => (
+                  <li key={index} className="text-sm text-muted-foreground flex items-start space-x-2">
+                    <span className="text-github-blue mt-1">•</span>
+                    <span>{tip}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </div>
       )}
     </div>
