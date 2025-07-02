@@ -2271,7 +2271,7 @@ export default function GitCheatSheet() {
         </div>
       )}
 
-      <div className="pt-16 min-h-full overflow-auto">
+      <div className="min-h-full overflow-auto">
         {/* Hero Header */}
         <div className="bg-gradient-to-r from-github-blue via-blue-600 to-indigo-600 text-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
@@ -2367,220 +2367,222 @@ export default function GitCheatSheet() {
           </div>
         </div>
 
-      {/* Commands Grid - Full Scrollable Area */}
-      <div className="flex-1 min-h-0 overflow-y-auto">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-          <div className="space-y-4 sm:space-y-6">
-            {filteredCommands.length === 0 ? (
-              <Card className="p-8 sm:p-12 text-center bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-                <div className="space-y-4">
-                  <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto">
-                    <Search className="h-6 w-6 sm:h-8 sm:w-8 text-gray-500 dark:text-gray-400" />
+        {/* Commands Grid - Full Scrollable Area */}
+        <div className="flex-1 min-h-0 overflow-y-auto">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+            <div className="space-y-4 sm:space-y-6">
+              {filteredCommands.length === 0 ? (
+                <Card className="p-8 sm:p-12 text-center bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                  <div className="space-y-4">
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto">
+                      <Search className="h-6 w-6 sm:h-8 sm:w-8 text-gray-500 dark:text-gray-400" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">No commands found</h3>
+                    <p className="text-gray-700 dark:text-gray-400 max-w-md mx-auto font-medium">
+                      Try adjusting your search terms or filters to find the Git commands you're looking for.
+                    </p>
                   </div>
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">No commands found</h3>
-                <p className="text-gray-700 dark:text-gray-400 max-w-md mx-auto font-medium">
-                  Try adjusting your search terms or filters to find the Git commands you're looking for.
-                </p>
-              </div>
-            </Card>
-          ) : (
-            filteredCommands.map((cmd) => {
-              const isExpanded = expandedCommands.has(cmd.command);
-              const isCopied = copiedCommand === cmd.command;
-              
-              return (
-                <Card 
-                  key={cmd.command} 
-                  className="bg-white dark:bg-gray-800 hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-gray-700 hover:border-github-blue/50 dark:hover:border-github-blue/50"
-                >
-                  <Collapsible open={isExpanded} onOpenChange={() => toggleCommandExpansion(cmd.command)}>
-                    <CollapsibleTrigger asChild>
-                      <CardHeader className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4">
-                            <div className="p-2 bg-gradient-to-br from-github-blue to-indigo-600 rounded-lg">
-                              <Terminal className="h-5 w-5 text-white" />
-                            </div>
-                            <div className="flex-1">
-                              <div className="flex items-center gap-3 mb-2">
-                                <CardTitle className="text-xl font-mono text-github-blue dark:text-blue-400">
-                                  {cmd.command}
-                                </CardTitle>
-                                <Badge className={getDifficultyColor(cmd.difficulty)}>
-                                  {cmd.difficulty}
-                                </Badge>
-                                {cmd.commonUse && (
-                                  <Badge variant="outline" className="border-green-500 text-green-700 dark:text-green-400">
-                                    Popular
-                                  </Badge>
-                                )}
-                              </div>
-                              <CardDescription className="text-base text-gray-800 dark:text-gray-300 font-medium">
-                                {cmd.description}
-                              </CardDescription>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                copyCommand(cmd.command);
-                              }}
-                              className="gap-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
-                            >
-                              {isCopied ? (
-                                <CheckCircle className="h-4 w-4 text-green-600" />
-                              ) : (
-                                <Copy className="h-4 w-4" />
-                              )}
-                              {isCopied ? "Copied!" : "Copy"}
-                            </Button>
-                            {isExpanded ? (
-                              <ChevronDown className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-                            ) : (
-                              <ChevronRight className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-                            )}
-                          </div>
-                        </div>
-                      </CardHeader>
-                    </CollapsibleTrigger>
-                    
-                    <CollapsibleContent>
-                      <CardContent className="pt-0 space-y-6 max-h-96 overflow-y-auto">
-                        {/* Syntax */}
-                        <div className="space-y-2">
-                          <h4 className="font-semibold text-lg flex items-center gap-2 text-gray-900 dark:text-gray-100">
-                            <FileText className="h-4 w-4" />
-                            Syntax
-                          </h4>
-                          <div className="bg-gray-900 dark:bg-gray-950 rounded-lg p-4 text-green-400 font-mono text-sm">
-                            {cmd.syntax}
-                          </div>
-                        </div>
-
-                        {/* Examples */}
-                        <div className="space-y-2">
-                          <h4 className="font-semibold text-lg flex items-center gap-2 text-gray-900 dark:text-gray-100">
-                            <Terminal className="h-4 w-4" />
-                            Examples
-                          </h4>
-                          <div className="space-y-2 max-h-48 overflow-y-auto">
-                            {cmd.examples.map((example, index) => (
-                              <div key={index} className="bg-gray-900 dark:bg-gray-950 rounded-lg p-4 flex items-center justify-between">
-                                <code className="text-green-400 font-mono text-sm">{example}</code>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => copyCommand(example)}
-                                  className="text-gray-400 hover:text-white"
-                                >
-                                  <Copy className="h-3 w-3" />
-                                </Button>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* Visualization */}
-                        {cmd.visualization && (
-                          <div className="space-y-2">
-                            <h4 className="font-semibold text-lg flex items-center gap-2 text-gray-900 dark:text-gray-100">
-                              <Eye className="h-4 w-4" />
-                              What it does
-                            </h4>
-                            <div className="bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                              <p className="text-blue-900 dark:text-blue-200 font-medium">{cmd.visualization}</p>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Tips */}
-                        {cmd.tips && cmd.tips.length > 0 && (
-                          <div className="space-y-2">
-                            <h4 className="font-semibold text-lg flex items-center gap-2 text-gray-900 dark:text-gray-100">
-                              <Zap className="h-4 w-4" />
-                              Pro Tips
-                            </h4>
-                            <ul className="space-y-2 max-h-32 overflow-y-auto">
-                              {cmd.tips.map((tip, index) => (
-                                <li key={index} className="flex items-start gap-2">
-                                  <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2 flex-shrink-0" />
-                                  <span className="text-sm text-gray-800 dark:text-gray-300 font-medium">{tip}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-
-                        {/* Warning */}
-                        {cmd.warning && (
-                          <div className="space-y-2">
-                            <div className="bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 rounded-lg p-4">
-                              <div className="flex items-start gap-2">
-                                <RotateCcw className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
-                                <div>
-                                  <h5 className="font-medium text-red-800 dark:text-red-200 mb-1">Caution</h5>
-                                  <p className="text-sm text-red-800 dark:text-red-300 font-medium">{cmd.warning}</p>
+                </Card>
+              ) : (
+                filteredCommands.map((cmd) => {
+                  const isExpanded = expandedCommands.has(cmd.command);
+                  const isCopied = copiedCommand === cmd.command;
+                  
+                  return (
+                    <Card 
+                      key={cmd.command} 
+                      className="bg-white dark:bg-gray-800 hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-gray-700 hover:border-github-blue/50 dark:hover:border-github-blue/50"
+                    >
+                      <Collapsible open={isExpanded} onOpenChange={() => toggleCommandExpansion(cmd.command)}>
+                        <CollapsibleTrigger asChild>
+                          <CardHeader className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-4">
+                                <div className="p-2 bg-gradient-to-br from-github-blue to-indigo-600 rounded-lg">
+                                  <Terminal className="h-5 w-5 text-white" />
+                                </div>
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-3 mb-2">
+                                    <CardTitle className="text-xl font-mono text-github-blue dark:text-blue-400">
+                                      {cmd.command}
+                                    </CardTitle>
+                                    <Badge className={getDifficultyColor(cmd.difficulty)}>
+                                      {cmd.difficulty}
+                                    </Badge>
+                                    {cmd.commonUse && (
+                                      <Badge variant="outline" className="border-green-500 text-green-700 dark:text-green-400">
+                                        Popular
+                                      </Badge>
+                                    )}
+                                  </div>
+                                  <CardDescription className="text-base text-gray-800 dark:text-gray-300 font-medium">
+                                    {cmd.description}
+                                  </CardDescription>
                                 </div>
                               </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Related Commands */}
-                        {cmd.relatedCommands && cmd.relatedCommands.length > 0 && (
-                          <div className="space-y-2">
-                            <h4 className="font-semibold text-lg flex items-center gap-2 text-gray-900 dark:text-gray-100">
-                              <GitBranch className="h-4 w-4" />
-                              Related Commands
-                            </h4>
-                            <div className="flex flex-wrap gap-2 max-h-24 overflow-y-auto">
-                              {cmd.relatedCommands.map((relatedCmd, index) => (
-                                <Badge 
-                                  key={index} 
-                                  variant="outline" 
-                                  className="font-mono cursor-pointer hover:bg-github-blue hover:text-white transition-colors border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-300 font-medium"
-                                  onClick={() => setSearchTerm(relatedCmd)}
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    copyCommand(cmd.command);
+                                  }}
+                                  className="gap-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
                                 >
-                                  {relatedCmd}
-                                </Badge>
-                              ))}
+                                  {isCopied ? (
+                                    <CheckCircle className="h-4 w-4 text-green-600" />
+                                  ) : (
+                                    <Copy className="h-4 w-4" />
+                                  )}
+                                  {isCopied ? "Copied!" : "Copy"}
+                                </Button>
+                                {isExpanded ? (
+                                  <ChevronDown className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+                                ) : (
+                                  <ChevronRight className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        )}
-                      </CardContent>
-                    </CollapsibleContent>
-                  </Collapsible>
-                </Card>
-              );
-            })
-          )}
-        </div>
-      </div>
+                          </CardHeader>
+                        </CollapsibleTrigger>
+                        
+                        <CollapsibleContent>
+                          <CardContent className="pt-0 space-y-6 max-h-96 overflow-y-auto">
+                            {/* Syntax */}
+                            <div className="space-y-2">
+                              <h4 className="font-semibold text-lg flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                                <FileText className="h-4 w-4" />
+                                Syntax
+                              </h4>
+                              <div className="bg-gray-900 dark:bg-gray-950 rounded-lg p-4 text-green-400 font-mono text-sm">
+                                {cmd.syntax}
+                              </div>
+                            </div>
 
-      {/* Footer */}
-      <div className="bg-gradient-to-r from-gray-900 to-gray-800 text-white py-12 mt-16">
-        <div className="max-w-7xl mx-auto px-6 text-center space-y-4">
-          <h3 className="text-2xl font-bold">Master Git with GitSarva</h3>
-          <p className="text-gray-300 max-w-2xl mx-auto">
-            This interactive cheat sheet is part of GitSarva's comprehensive Git learning platform. 
-            Practice these commands in our safe sandbox environment and master Git through hands-on experience.
-          </p>
-          <div className="flex justify-center gap-4">
-            <Button 
-              variant="outline" 
-              className="bg-white/10 border-white/20 text-white hover:bg-white/20"
-            >
-              Start Learning
-            </Button>
-            <Button 
-              variant="outline" 
-              className="bg-white/10 border-white/20 text-white hover:bg-white/20"
-            >
-              Practice Sandbox
-            </Button>
+                            {/* Examples */}
+                            <div className="space-y-2">
+                              <h4 className="font-semibold text-lg flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                                <Terminal className="h-4 w-4" />
+                                Examples
+                              </h4>
+                              <div className="space-y-2 max-h-48 overflow-y-auto">
+                                {cmd.examples.map((example, index) => (
+                                  <div key={index} className="bg-gray-900 dark:bg-gray-950 rounded-lg p-4 flex items-center justify-between">
+                                    <code className="text-green-400 font-mono text-sm">{example}</code>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => copyCommand(example)}
+                                      className="text-gray-400 hover:text-white"
+                                    >
+                                      <Copy className="h-3 w-3" />
+                                    </Button>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Visualization */}
+                            {cmd.visualization && (
+                              <div className="space-y-2">
+                                <h4 className="font-semibold text-lg flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                                  <Eye className="h-4 w-4" />
+                                  What it does
+                                </h4>
+                                <div className="bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                                  <p className="text-blue-900 dark:text-blue-200 font-medium">{cmd.visualization}</p>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Tips */}
+                            {cmd.tips && cmd.tips.length > 0 && (
+                              <div className="space-y-2">
+                                <h4 className="font-semibold text-lg flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                                  <Zap className="h-4 w-4" />
+                                  Pro Tips
+                                </h4>
+                                <ul className="space-y-2 max-h-32 overflow-y-auto">
+                                  {cmd.tips.map((tip, index) => (
+                                    <li key={index} className="flex items-start gap-2">
+                                      <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2 flex-shrink-0" />
+                                      <span className="text-sm text-gray-800 dark:text-gray-300 font-medium">{tip}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+
+                            {/* Warning */}
+                            {cmd.warning && (
+                              <div className="space-y-2">
+                                <div className="bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                                  <div className="flex items-start gap-2">
+                                    <RotateCcw className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+                                    <div>
+                                      <h5 className="font-medium text-red-800 dark:text-red-200 mb-1">Caution</h5>
+                                      <p className="text-sm text-red-800 dark:text-red-300 font-medium">{cmd.warning}</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Related Commands */}
+                            {cmd.relatedCommands && cmd.relatedCommands.length > 0 && (
+                              <div className="space-y-2">
+                                <h4 className="font-semibold text-lg flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                                  <GitBranch className="h-4 w-4" />
+                                  Related Commands
+                                </h4>
+                                <div className="flex flex-wrap gap-2 max-h-24 overflow-y-auto">
+                                  {cmd.relatedCommands.map((relatedCmd, index) => (
+                                    <Badge 
+                                      key={index} 
+                                      variant="outline" 
+                                      className="font-mono cursor-pointer hover:bg-github-blue hover:text-white transition-colors border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-300 font-medium"
+                                      onClick={() => setSearchTerm(relatedCmd)}
+                                    >
+                                      {relatedCmd}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </CardContent>
+                        </CollapsibleContent>
+                      </Collapsible>
+                    </Card>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="bg-gradient-to-r from-gray-900 to-gray-800 text-white py-12 mt-16">
+          <div className="max-w-7xl mx-auto px-6 text-center space-y-4">
+            <h3 className="text-2xl font-bold">Master Git with GitSarva</h3>
+            <p className="text-gray-300 max-w-2xl mx-auto">
+              This interactive cheat sheet is part of GitSarva's comprehensive Git learning platform. 
+              Practice these commands in our safe sandbox environment and master Git through hands-on experience.
+            </p>
+            <div className="flex justify-center gap-4">
+              <Button 
+                variant="outline" 
+                className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+              >
+                Start Learning
+              </Button>
+              <Button 
+                variant="outline" 
+                className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+              >
+                Practice Sandbox
+              </Button>
+            </div>
           </div>
         </div>
       </div>

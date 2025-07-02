@@ -138,7 +138,7 @@ export default function Home() {
         </div>
       )}
 
-      <div className="flex h-screen pt-16 overflow-hidden">
+      <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
         <ResizablePanelGroup direction="horizontal" className="w-full h-full">
           {/* Tutorial Sidebar - Always present as ResizablePanel */}
           <ResizablePanel

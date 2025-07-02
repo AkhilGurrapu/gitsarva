@@ -61,6 +61,9 @@ export default {
           border: "var(--sidebar-border)",
           ring: "var(--sidebar-ring)",
         },
+        "github-blue": "#0969da",
+        "github-dark": "#24292f",
+        "git-green": "#2da44e",
       },
       keyframes: {
         "accordion-down": {

@@ -284,7 +284,7 @@ export default function Practice() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-white dark:bg-gray-900 flex flex-col">
       <AppHeader 
         onToggleMobileSidebar={() => setShowMobileSidebar(!showMobileSidebar)}
         onStartWalkthrough={() => {}}
@@ -295,40 +295,20 @@ export default function Practice() {
         <div className="lg:hidden fixed inset-0 z-50 bg-black/50" onClick={() => setShowMobileSidebar(false)}>
           <div className="absolute left-0 top-16 bottom-0 w-4/5 max-w-sm bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-transform duration-300" onClick={(e) => e.stopPropagation()}>
             <div className="p-4">
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-4">Practice Navigation</h3>
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-4">Practice Center</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                Master Git through hands-on practice scenarios and challenges.
+              </p>
               <div className="space-y-2">
-                <Button 
-                  variant={activeTab === "scenarios" ? "default" : "outline"} 
-                  className="w-full justify-start"
-                  onClick={() => {setActiveTab("scenarios"); setShowMobileSidebar(false);}}
-                >
-                  <BookOpen className="h-4 w-4 mr-2" />
-                  Practice Scenarios
-                </Button>
-                <Button 
-                  variant={activeTab === "playground" ? "default" : "outline"} 
-                  className="w-full justify-start"
-                  onClick={() => {setActiveTab("playground"); setShowMobileSidebar(false);}}
-                  disabled={!selectedScenario}
-                >
-                  <Terminal className="h-4 w-4 mr-2" />
-                  Interactive Playground
-                </Button>
-                <Button 
-                  variant={activeTab === "free-play" ? "default" : "outline"} 
-                  className="w-full justify-start"
-                  onClick={() => {setActiveTab("free-play"); setShowMobileSidebar(false);}}
-                >
-                  <Zap className="h-4 w-4 mr-2" />
-                  Free Play
-                </Button>
+                <div className="text-sm font-medium text-gray-900 dark:text-gray-100">Getting Started</div>
+                <div className="text-xs text-gray-600 dark:text-gray-400">Choose a practice scenario from the list to begin your learning journey.</div>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      <div className="pt-16">
+      <div className="flex-1 overflow-hidden bg-white dark:bg-gray-900">
         <TooltipProvider>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="min-h-full">
           {/* Page Header */}
