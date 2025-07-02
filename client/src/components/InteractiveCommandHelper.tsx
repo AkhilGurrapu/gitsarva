@@ -40,79 +40,147 @@ export default function InteractiveCommandHelper({
     if (!initialized) {
       suggestions.push({
         command: 'git init',
-        description: 'Initialize a new Git repository',
-        why: 'You need to create a Git repository before you can track changes',
+        description: '🚀 Initialize a new Git repository',
+        why: '✨ This activates Git tracking in your folder - watch the visualization come alive!',
         category: 'basic',
         priority: 10
       });
       return suggestions;
     }
 
-    // Check for untracked files
+    // Check for untracked files - highest priority for next action
     const untrackedFiles = files.filter(f => f.status === 'untracked');
     if (untrackedFiles.length > 0) {
       suggestions.push({
         command: 'git add .',
-        description: 'Add all untracked files to staging area',
-        why: `You have ${untrackedFiles.length} untracked file(s). Add them to start tracking changes`,
+        description: `🛒 Add all ${untrackedFiles.length} files to staging`,
+        why: `🟡→🔵 Watch files move from Working Directory to Staging Area!`,
         category: 'basic',
-        priority: 8
+        priority: 10
       });
       
       suggestions.push({
         command: `git add ${untrackedFiles[0].name}`,
-        description: 'Add a specific file to staging area',
-        why: 'Sometimes you want to add files one by one for more control',
+        description: '📁 Add specific file to staging',
+        why: '🎯 Precise control - add one file at a time and see it move!',
         category: 'basic',
-        priority: 7
+        priority: 9
+      });
+      
+      // Only suggest git status when there are untracked files to review
+      suggestions.push({
+        command: 'git status',
+        description: '🧭 Check repository status',
+        why: '📊 See exactly what the visualization shows - your current Git state!',
+        category: 'basic',
+        priority: 8
       });
     }
 
-    // Check for staged files
+    // Check for staged files - commit should be highest priority
     const staged = files.filter(f => f.status === 'staged');
     if (staged.length > 0) {
       suggestions.push({
-        command: 'git commit -m "Your commit message"',
-        description: 'Commit your staged changes',
-        why: `You have ${staged.length} staged file(s) ready to be committed`,
+        command: 'git commit -m "Add new features"',
+        description: `💾 Commit ${staged.length} staged files`,
+        why: `🔵→🟢 Watch files move from Staging to Repository permanently!`,
+        category: 'basic',
+        priority: 10
+      });
+      
+      suggestions.push({
+        command: 'git reset HEAD',
+        description: '↩️ Unstage files',
+        why: '🔵→🟡 Move files back from Staging to Working Directory',
+        category: 'intermediate',
+        priority: 7
+      });
+      
+      // Status is less important when you know what to do next
+      suggestions.push({
+        command: 'git status',
+        description: '🧭 Check repository status',
+        why: '📊 Confirm your staged files before committing',
+        category: 'basic',
+        priority: 6
+      });
+    }
+
+    // If no files or all committed, suggest creating files or git status
+    if (files.length === 0 || untrackedFiles.length === 0 && staged.length === 0) {
+      if (files.length === 0) {
+        suggestions.push({
+          command: 'echo "Hello Git!" > README.md',
+          description: '📝 Create your first file',
+          why: '🟡 Watch it appear in the Working Directory visualization!',
+          category: 'basic',
+          priority: 10
+        });
+      }
+      
+      suggestions.push({
+        command: 'git status',
+        description: '🧭 Check repository status',
+        why: '📊 See exactly what the visualization shows - your current Git state!',
         category: 'basic',
         priority: 9
       });
     }
 
-    // General commands always available
-    suggestions.push({
-      command: 'git status',
-      description: 'Check the status of your repository',
-      why: 'Always good to know what\'s happening in your repo',
-      category: 'basic',
-      priority: 6
-    });
-
+    // Exploration and history commands
     if (commits.length > 0) {
       suggestions.push({
-        command: 'git log',
-        description: 'View commit history',
-        why: 'See all the commits you\'ve made so far',
+        command: 'git log --oneline',
+        description: '📋 View compact commit history',
+        why: '🕐 See your project timeline - perfect with the Repository visualization!',
         category: 'basic',
+        priority: 7
+      });
+
+      suggestions.push({
+        command: `git show ${commits[commits.length - 1]?.hash.substring(0, 7)}`,
+        description: '👁️ Show details of latest commit',
+        why: '🔍 Explore what changed in your most recent commit',
+        category: 'basic',
+        priority: 7
+      });
+
+      suggestions.push({
+        command: 'git log',
+        description: '📚 View detailed commit history',
+        why: '📖 Full timeline with authors, dates, and messages',
+        category: 'basic',
+        priority: 6
+      });
+    }
+
+    // Branch operations
+    if (initialized) {
+      suggestions.push({
+        command: 'git branch',
+        description: '🌳 List all branches',
+        why: '🔍 See all available branches in your repository',
+        category: 'intermediate',
         priority: 5
       });
 
-      suggestions.push({
-        command: 'git branch new-feature',
-        description: 'Create a new branch',
-        why: 'Branches let you work on features without affecting main code',
-        category: 'intermediate',
-        priority: 6
-      });
+      if (commits.length > 0) {
+        suggestions.push({
+          command: 'git checkout -b feature-branch',
+          description: '🚀 Create and switch to new branch',
+          why: '✨ Start working on a new feature safely in isolation',
+          category: 'intermediate',
+          priority: 4
+        });
+      }
 
       if (Object.keys(repositoryState.branches).length > 1) {
         const otherBranches = Object.keys(repositoryState.branches).filter(b => b !== currentBranch);
         if (otherBranches.length > 0) {
           suggestions.push({
             command: `git checkout ${otherBranches[0]}`,
-            description: 'Switch to another branch',
-            why: 'Move between different branches to work on different features',
+            description: '🔀 Switch to another branch',
+            why: '🌿 Move between different branches to work on different features',
             category: 'intermediate',
             priority: 5
           });
@@ -120,14 +188,35 @@ export default function InteractiveCommandHelper({
       }
     }
 
-    // Advanced commands
+
+
+    // Advanced exploration
     if (commits.length > 1) {
       suggestions.push({
-        command: 'git diff',
-        description: 'Show changes between files',
-        why: 'See exactly what changed in your files',
+        command: 'git diff HEAD~1',
+        description: '🔍 Compare with previous commit',
+        why: '📊 See exactly what changed since your last commit',
         category: 'advanced',
-        priority: 4
+        priority: 3
+      });
+
+      suggestions.push({
+        command: 'git diff',
+        description: '📋 Show all changes',
+        why: '📄 See exactly what changed in your files',
+        category: 'advanced',
+        priority: 3
+      });
+    }
+
+    // Reset and undo operations
+    if (staged.length > 0 || files.some(f => f.status === 'modified')) {
+      suggestions.push({
+        command: 'git reset --hard',
+        description: '⚠️ Discard all changes',
+        why: '🔄 Reset everything to last commit state (careful!)',
+        category: 'advanced',
+        priority: 2
       });
     }
 
@@ -182,9 +271,9 @@ export default function InteractiveCommandHelper({
   };
 
   return (
-    <Card className="h-full flex flex-col">
+    <Card className="h-full flex flex-col" data-walkthrough="command-helper">
       <CardHeader className="pb-3">
-        <CardTitle className="flex items-center space-x-2 text-github-dark dark:text-foreground">
+                    <CardTitle className="flex items-center gap-2 text-github-dark dark:text-foreground min-w-0">
           <Zap className="h-5 w-5 text-yellow-500" />
           <span>Smart Command Helper</span>
           {getStatusIcon()}
@@ -196,7 +285,7 @@ export default function InteractiveCommandHelper({
 
       <CardContent className="flex-1 space-y-4">
         {/* Category Selection */}
-        <div className="flex space-x-2">
+                      <div className="flex gap-2 min-w-0">
           {(['basic', 'intermediate', 'advanced'] as const).map(category => (
             <Button
               key={category}
@@ -226,7 +315,7 @@ export default function InteractiveCommandHelper({
                       <code className="text-sm font-mono bg-github-bg dark:bg-muted px-2 py-1 rounded text-github-dark dark:text-foreground">
                         {suggestion.command}
                       </code>
-                      <div className="flex space-x-1">
+                      <div className="flex gap-1 min-w-0">
                         <Button
                           variant="ghost"
                           size="sm"
@@ -265,7 +354,7 @@ export default function InteractiveCommandHelper({
         {lastCommand && (
           <Card className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
             <CardContent className="p-3">
-              <div className="flex items-center space-x-2">
+                              <div className="flex items-center gap-2 min-w-0">
                 <CheckCircle className="h-4 w-4 text-green-600" />
                 <div>
                   <p className="text-xs font-medium text-green-800 dark:text-green-200">

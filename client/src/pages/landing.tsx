@@ -1,10 +1,12 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import LoginForm from "@/components/LoginForm";
 import { GitBranch, Code, Trophy, Users, BookOpen, Terminal } from "lucide-react";
 
 export default function Landing() {
-  const handleLogin = () => {
-    window.location.href = "/api/login";
+  const handleLoginSuccess = (userData: any) => {
+    // Refresh the page to trigger auth state update
+    window.location.reload();
   };
 
   return (
@@ -14,30 +16,19 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
           <div className="text-center">
             <div className="flex items-center justify-center space-x-2 mb-8">
-              <GitBranch className="h-12 w-12 text-git-red" />
+              <div className="flex items-center justify-center h-16 w-16 bg-gradient-to-br from-git-red to-github-blue rounded-xl">
+                <span className="text-white font-bold text-2xl">GS</span>
+              </div>
               <h1 className="text-4xl md:text-6xl font-bold text-github-dark dark:text-foreground">
-                Git Playground
+                GitSarva
               </h1>
             </div>
             <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto">
               Master Git and GitHub through interactive tutorials, visual sandbox, and hands-on challenges. 
               Learn version control the intuitive way.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
-                onClick={handleLogin}
-                size="lg" 
-                className="bg-github-blue hover:bg-github-blue/90 text-white px-8 py-4 text-lg"
-              >
-                Start Learning
-              </Button>
-              <Button 
-                variant="outline" 
-                size="lg" 
-                className="px-8 py-4 text-lg border-github-blue text-github-blue hover:bg-github-blue hover:text-white"
-              >
-                View Demo
-              </Button>
+            <div className="flex justify-center">
+              <LoginForm onLoginSuccess={handleLoginSuccess} />
             </div>
           </div>
         </div>
@@ -140,13 +131,9 @@ export default function Landing() {
           <p className="text-xl text-gray-300 mb-8">
             Join thousands of developers who have improved their Git skills with our interactive platform.
           </p>
-          <Button 
-            onClick={handleLogin}
-            size="lg" 
-            className="bg-git-green hover:bg-git-green/90 text-white px-8 py-4 text-lg"
-          >
-            Get Started Now
-          </Button>
+          <p className="text-gray-300">
+            Login above to get started with GitSarva!
+          </p>
         </div>
       </div>
 
@@ -156,7 +143,7 @@ export default function Landing() {
           <div className="flex items-center justify-center space-x-2">
             <GitBranch className="h-6 w-6 text-git-red" />
             <span className="text-lg font-semibold text-github-dark dark:text-foreground">
-              Git Playground
+              GitSarva
             </span>
           </div>
           <p className="text-center text-muted-foreground mt-4">

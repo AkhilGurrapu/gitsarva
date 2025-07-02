@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,24 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { GitBranch, Sun, Moon, ChevronDown, User, LogOut, Menu, HelpCircle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { Link, useLocation } from "wouter";
+
+// Type definitions for our auth system
+interface GitSarvaUser {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  profileImageUrl: string;
+}
+
+interface UserProgress {
+  id: number;
+  userId: string;
+  lessonId: number;
+  completed: boolean;
+  completedAt: string | null;
+}
 
 interface AppHeaderProps {
   onToggleMobileSidebar?: () => void;
@@ -21,36 +39,56 @@ interface AppHeaderProps {
 export default function AppHeader({ onToggleMobileSidebar, onStartWalkthrough }: AppHeaderProps) {
   const { user } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  const [location] = useLocation();
   
-  const { data: progress = [] } = useQuery({
+  // Type the user as GitSarvaUser
+  const typedUser = user as GitSarvaUser | undefined;
+  
+  const { data: progress = [] } = useQuery<UserProgress[]>({
     queryKey: ['/api/progress'],
     enabled: !!user,
   });
 
-  const completedLessons = progress.filter((p: any) => p.completed).length;
+  const completedLessons = progress.filter((p: UserProgress) => p.completed).length;
   const totalLessons = 10; // This would come from lessons API
   const progressPercentage = totalLessons > 0 ? (completedLessons / totalLessons) * 100 : 0;
 
-  const handleLogout = () => {
-    window.location.href = "/api/logout";
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   const getUserDisplayName = () => {
-    if (user?.firstName && user?.lastName) {
-      return `${user.firstName} ${user.lastName}`;
+    if (typedUser?.firstName && typedUser?.lastName) {
+      return `${typedUser.firstName} ${typedUser.lastName}`;
     }
-    if (user?.firstName) {
-      return user.firstName;
+    if (typedUser?.firstName) {
+      return typedUser.firstName;
     }
-    if (user?.email) {
-      return user.email;
+    if (typedUser?.email) {
+      return typedUser.email;
     }
     return "User";
   };
 
   const getUserInitials = () => {
     const name = getUserDisplayName();
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    return name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
+  };
+
+  const getNavLinkClass = (path: string) => {
+    return location === path 
+      ? "text-github-dark dark:text-foreground hover:text-github-blue font-medium transition-colors duration-200 border-b-2 border-github-blue"
+      : "text-muted-foreground hover:text-github-blue font-medium transition-colors duration-200 hover:border-b-2 hover:border-github-blue pb-1";
   };
 
   return (
@@ -69,24 +107,23 @@ export default function AppHeader({ onToggleMobileSidebar, onStartWalkthrough }:
             </Button>
             
             <div className="flex items-center space-x-2">
-              <GitBranch className="h-6 w-6 text-git-red" />
+              <div className="flex items-center justify-center h-8 w-8 bg-gradient-to-br from-git-red to-github-blue rounded-lg">
+                <span className="text-white font-bold text-sm">GS</span>
+              </div>
               <h1 className="text-xl font-bold text-github-dark dark:text-foreground">
-                Git Playground
+                GitSarva
               </h1>
             </div>
             <nav className="hidden md:flex space-x-8">
-              <a href="#" className="text-github-dark dark:text-foreground hover:text-github-blue font-medium">
+              <Link href="/" className={getNavLinkClass("/")}>
                 Learn
-              </a>
-              <a href="#" className="text-muted-foreground hover:text-github-blue font-medium">
+              </Link>
+              <Link href="/practice" className={getNavLinkClass("/practice")}>
                 Practice
-              </a>
-              <a href="#" className="text-muted-foreground hover:text-github-blue font-medium">
-                Challenges
-              </a>
-              <a href="#" className="text-muted-foreground hover:text-github-blue font-medium">
-                Docs
-              </a>
+              </Link>
+              <Link href="/git-cheat-sheet" className={getNavLinkClass("/git-cheat-sheet")}>
+                Git Cheat Sheet
+              </Link>
             </nav>
           </div>
           
@@ -133,7 +170,7 @@ export default function AppHeader({ onToggleMobileSidebar, onStartWalkthrough }:
                 <Button variant="ghost" className="flex items-center space-x-2 p-2">
                   <Avatar className="h-8 w-8">
                     <AvatarImage 
-                      src={user?.profileImageUrl || undefined} 
+                      src={typedUser?.profileImageUrl || undefined} 
                       alt={getUserDisplayName()} 
                     />
                     <AvatarFallback>{getUserInitials()}</AvatarFallback>

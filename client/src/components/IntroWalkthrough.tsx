@@ -115,7 +115,7 @@ export default function IntroWalkthrough({ isOpen, onClose }: IntroWalkthroughPr
   };
 
   const handleFinish = () => {
-    localStorage.setItem('git-playground-walkthrough-seen', 'true');
+    localStorage.setItem('gitsarva-walkthrough-seen', 'true');
     onClose();
   };
 
@@ -129,7 +129,7 @@ export default function IntroWalkthrough({ isOpen, onClose }: IntroWalkthroughPr
           <div className="flex items-center justify-between">
             <DialogTitle className="flex items-center space-x-2">
               <Icon className="h-5 w-5 text-github-blue" />
-              <span>Welcome to Git Playground</span>
+              <span>Welcome to GitSarva</span>
             </DialogTitle>
             <Button variant="ghost" size="sm" onClick={onClose}>
               <X className="h-4 w-4" />

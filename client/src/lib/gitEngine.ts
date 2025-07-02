@@ -30,10 +30,10 @@ class GitEngine {
     const hasUnstagedChanges = this.state.files.some(f => f.status === 'modified' || f.status === 'untracked');
     this.state.workingDirectory = hasUnstagedChanges ? 'modified' : 'clean';
     
-    // Update staged files array
-    this.state.stagedFiles = this.state.files
+    // Update staged files array - create new array reference
+    this.state.stagedFiles = [...this.state.files
       .filter(f => f.status === 'staged')
-      .map(f => f.name);
+      .map(f => f.name)];
   }
 
   async executeCommand(command: string): Promise<CommandResult> {
@@ -73,6 +73,15 @@ class GitEngine {
           break;
         case 'diff':
           result = this.diff(args);
+          break;
+        case 'show':
+          result = this.show(args);
+          break;
+        case 'reset':
+          result = this.reset(args);
+          break;
+        case 'merge':
+          result = this.merge(args);
           break;
         default:
           result = { 
@@ -176,26 +185,33 @@ class GitEngine {
     const target = args[0];
     
     if (target === '.') {
-      // Add all files
-      const unstaged = this.state.files.filter(f => f.status === 'untracked' || f.status === 'modified');
-      unstaged.forEach(f => {
-        f.status = 'staged';
-      });
+      // Add all files - create new array with updated file objects
+      const unstagedNames = this.state.files
+        .filter(f => f.status === 'untracked' || f.status === 'modified')
+        .map(f => f.name);
+      
+      this.state.files = this.state.files.map(f => 
+        unstagedNames.includes(f.name) 
+          ? { ...f, status: 'staged' as const }
+          : f
+      );
+      
       this.updateWorkingDirectoryStatus();
       return { 
-        output: unstaged.length > 0 ? `Added ${unstaged.length} file(s) to staging area.` : 'No files to add.', 
+        output: unstagedNames.length > 0 ? `Added ${unstagedNames.length} file(s) to staging area.` : 'No files to add.', 
         error: '' 
       };
     } else {
       // Add specific file
-      const file = this.state.files.find(f => f.name === target);
-      if (!file) {
+      const fileIndex = this.state.files.findIndex(f => f.name === target);
+      if (fileIndex === -1) {
         return { 
           output: '', 
           error: `pathspec '${target}' did not match any files` 
         };
       }
       
+      const file = this.state.files[fileIndex];
       if (file.status === 'staged' || file.status === 'committed') {
         return { 
           output: `File '${target}' is already staged or committed.`, 
@@ -203,7 +219,11 @@ class GitEngine {
         };
       }
       
-      file.status = 'staged';
+      // Create new array with updated file
+      this.state.files = this.state.files.map((f, index) => 
+        index === fileIndex ? { ...f, status: 'staged' as const } : f
+      );
+      
       this.updateWorkingDirectoryStatus();
       return { 
         output: `Added '${target}' to staging area.`, 
@@ -245,15 +265,19 @@ class GitEngine {
       files: stagedFiles.map(f => f.name),
     };
 
-    this.state.commits.push(commit);
+    // Create new commits array
+    this.state.commits = [...this.state.commits, commit];
     if (this.state.currentBranch) {
       this.state.branches[this.state.currentBranch] = [...this.state.commits];
     }
 
-    // Update file statuses
-    stagedFiles.forEach(f => {
-      f.status = 'committed';
-    });
+    // Update file statuses - create new array with updated file objects
+    const stagedFileNames = stagedFiles.map(f => f.name);
+    this.state.files = this.state.files.map(f => 
+      stagedFileNames.includes(f.name) 
+        ? { ...f, status: 'committed' as const }
+        : f
+    );
 
     this.updateWorkingDirectoryStatus();
 
@@ -348,15 +372,173 @@ class GitEngine {
       };
     }
 
+    const oneline = args.includes('--oneline');
     let output = '';
-    this.state.commits.slice().reverse().forEach(commit => {
-      output += `commit ${commit.hash}\n`;
-      output += `Author: ${commit.author}\n`;
-      output += `Date: ${new Date(commit.date).toLocaleString()}\n\n`;
-      output += `    ${commit.message}\n\n`;
-    });
+    
+    if (oneline) {
+      this.state.commits.slice().reverse().forEach(commit => {
+        output += `${commit.hash.substring(0, 7)} ${commit.message}\n`;
+      });
+    } else {
+      this.state.commits.slice().reverse().forEach(commit => {
+        output += `commit ${commit.hash}\n`;
+        output += `Author: ${commit.author}\n`;
+        output += `Date: ${new Date(commit.date).toLocaleString()}\n\n`;
+        output += `    ${commit.message}\n\n`;
+      });
+    }
 
     return { output, error: '' };
+  }
+
+  private show(args: string[]): CommandResult {
+    if (!this.state.initialized) {
+      return { 
+        output: '', 
+        error: 'Not a git repository. Run \'git init\' first.' 
+      };
+    }
+
+    if (this.state.commits.length === 0) {
+      return { 
+        output: '', 
+        error: 'No commits found.' 
+      };
+    }
+
+    let targetCommit: GitCommit | undefined;
+    
+    if (args.length === 0) {
+      // Show HEAD commit
+      targetCommit = this.state.commits[this.state.commits.length - 1];
+    } else {
+      // Find commit by hash prefix
+      const hashPrefix = args[0];
+      targetCommit = this.state.commits.find(c => c.hash.startsWith(hashPrefix));
+      
+      if (!targetCommit) {
+        return { 
+          output: '', 
+          error: `Commit '${hashPrefix}' not found.` 
+        };
+      }
+    }
+
+    let output = `commit ${targetCommit.hash}\n`;
+    output += `Author: ${targetCommit.author}\n`;
+    output += `Date: ${new Date(targetCommit.date).toLocaleString()}\n\n`;
+    output += `    ${targetCommit.message}\n\n`;
+    
+    if (targetCommit.files.length > 0) {
+      output += `Files changed in this commit:\n`;
+      targetCommit.files.forEach(fileName => {
+        const file = this.state.files.find(f => f.name === fileName);
+        if (file) {
+          output += `+++ ${fileName}\n`;
+          output += `    Content: ${file.content.substring(0, 100)}${file.content.length > 100 ? '...' : ''}\n`;
+        }
+      });
+    }
+
+    return { output, error: '' };
+  }
+
+  private reset(args: string[]): CommandResult {
+    if (!this.state.initialized) {
+      return { 
+        output: '', 
+        error: 'Not a git repository. Run \'git init\' first.' 
+      };
+    }
+
+    if (args.length === 0) {
+      return { 
+        output: '', 
+        error: 'Please specify what to reset. Try \'git reset HEAD\' or \'git reset --hard\'.' 
+      };
+    }
+
+    const target = args[0];
+    
+    if (target === 'HEAD' || target === '--soft') {
+      // Reset staged files back to working directory
+      this.state.files = this.state.files.map(f => 
+        f.status === 'staged' ? { ...f, status: 'modified' as const } : f
+      );
+      this.updateWorkingDirectoryStatus();
+      return { 
+        output: 'Unstaged all changes. Files moved back to working directory.', 
+        error: '' 
+      };
+    } else if (target === '--hard') {
+      // Reset everything to last commit state
+      this.state.files = this.state.files.map(f => 
+        f.status === 'staged' || f.status === 'modified' 
+          ? { ...f, status: 'committed' as const }
+          : f
+      );
+      this.updateWorkingDirectoryStatus();
+      return { 
+        output: 'Hard reset complete. All changes discarded.', 
+        error: '' 
+      };
+    }
+
+    return { 
+      output: '', 
+      error: `Unknown reset option: ${target}. Try 'git reset HEAD' or 'git reset --hard'.` 
+    };
+  }
+
+  private merge(args: string[]): CommandResult {
+    if (!this.state.initialized) {
+      return { 
+        output: '', 
+        error: 'Not a git repository. Run \'git init\' first.' 
+      };
+    }
+
+    if (args.length === 0) {
+      return { 
+        output: '', 
+        error: 'Please specify a branch to merge.' 
+      };
+    }
+
+    const targetBranch = args[0];
+    
+    if (!this.state.branches[targetBranch]) {
+      return { 
+        output: '', 
+        error: `Branch '${targetBranch}' does not exist.` 
+      };
+    }
+
+    if (targetBranch === this.state.currentBranch) {
+      return { 
+        output: '', 
+        error: 'Cannot merge a branch into itself.' 
+      };
+    }
+
+    // Simple merge simulation - just create a merge commit
+    const mergeCommit: GitCommit = {
+      hash: this.generateHash(),
+      message: `Merge branch '${targetBranch}' into ${this.state.currentBranch}`,
+      date: new Date().toISOString(),
+      author: 'Git User',
+      files: [],
+    };
+
+    this.state.commits = [...this.state.commits, mergeCommit];
+    if (this.state.currentBranch) {
+      this.state.branches[this.state.currentBranch] = [...this.state.commits];
+    }
+
+    return { 
+      output: `Merge completed. Created merge commit ${mergeCommit.hash.substring(0, 7)}.`, 
+      error: '' 
+    };
   }
 
   private diff(args: string[]): CommandResult {
@@ -390,7 +572,13 @@ class GitEngine {
   }
 
   getState(): RepositoryState {
-    return { ...this.state };
+    return { 
+      ...this.state,
+      files: [...this.state.files], // Create new array reference
+      commits: [...this.state.commits], // Create new array reference
+      stagedFiles: [...this.state.stagedFiles], // Create new array reference
+      branches: { ...this.state.branches } // Create new object reference
+    };
   }
 
   getCurrentBranch(): string | null {
@@ -440,7 +628,16 @@ export function useGitEngine() {
   }, [triggerUpdate]);
 
   const executeCommand = useCallback(async (command: string): Promise<CommandResult> => {
+    console.log('🚀 Executing command:', command);
     const result = await engine.executeCommand(command);
+    const newState = engine.getRepositoryState();
+    console.log('📊 New state after command:', {
+      initialized: newState.initialized,
+      filesCount: newState.files.length,
+      files: newState.files.map(f => ({ name: f.name, status: f.status })),
+      commits: newState.commits.length,
+      stagedFiles: newState.stagedFiles
+    });
     notifyStateUpdate(); // Notify all components of state change
     return result;
   }, [engine]);

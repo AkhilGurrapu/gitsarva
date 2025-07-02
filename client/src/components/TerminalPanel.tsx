@@ -121,35 +121,59 @@ export default function TerminalPanel({ suggestedCommand, onCommandExecuted }: T
 
   const currentBranch = getCurrentBranch();
 
+  const repositoryState = getRepositoryState();
+
   return (
-    <div className="flex-1 flex flex-col bg-github-dark">
-      <div className="flex items-center justify-between p-3 border-b border-gray-700">
-        <div className="flex items-center space-x-2">
-          <Terminal className="h-5 w-5 text-git-green" />
-          <span className="text-white font-medium">Terminal</span>
-          {currentBranch && (
-            <span className="text-xs text-gray-400">
-              ({currentBranch})
+    <div className="flex-1 flex flex-col bg-github-dark" data-walkthrough="terminal-panel">
+      <div className="flex flex-col space-y-2 p-3 border-b border-gray-700">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Terminal className="h-5 w-5 text-git-green" />
+            <span className="text-white font-medium">Git Terminal</span>
+            {currentBranch && (
+              <span className="text-xs text-blue-300 bg-blue-900/30 px-2 py-1 rounded">
+                📁 {currentBranch}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearTerminal}
+              className="text-gray-400 hover:text-white hover:bg-gray-700"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-gray-400 hover:text-white hover:bg-gray-700"
+            >
+              <Maximize2 className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+        
+        {/* Repository Status Bar */}
+        {repositoryState.initialized && (
+          <div className="flex items-center gap-4 text-xs text-gray-400">
+            {repositoryState.commits.length > 0 && (
+              <span className="text-green-300">
+                🏷️ HEAD: {repositoryState.commits[repositoryState.commits.length - 1]?.hash.substring(0, 7)}
+              </span>
+            )}
+            <span className="text-yellow-300">
+              📝 {repositoryState.files.filter(f => f.status === 'untracked').length} untracked
             </span>
-          )}
-        </div>
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={clearTerminal}
-            className="text-gray-400 hover:text-white hover:bg-gray-700"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-gray-400 hover:text-white hover:bg-gray-700"
-          >
-            <Maximize2 className="h-4 w-4" />
-          </Button>
-        </div>
+            <span className="text-blue-300">
+              🟦 {repositoryState.files.filter(f => f.status === 'staged').length} staged
+            </span>
+            <span className="text-green-300">
+              ✅ {repositoryState.commits.length} commits
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Terminal Output */}
@@ -189,8 +213,16 @@ export default function TerminalPanel({ suggestedCommand, onCommandExecuted }: T
             />
           </div>
         </div>
-        <div className="mt-2 text-xs text-gray-400">
-          <span className="text-git-green">Tip:</span> Try commands like "git status", "git add .", or "git commit -m 'message'"
+        <div className="mt-2 space-y-1 text-xs text-gray-400">
+          <div>
+            <span className="text-git-green">💡 Pro Tip:</span> Watch the visualizations update as you execute commands!
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <span className="text-blue-300">🔍 Explore:</span>
+            <code className="text-green-300">git status</code>
+            <code className="text-yellow-300">git log --oneline</code>
+            <code className="text-purple-300">git show HEAD</code>
+          </div>
         </div>
       </div>
     </div>

@@ -13,8 +13,7 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations } from "drizzle-orm";
 
-// Session storage table.
-// (IMPORTANT) This table is mandatory for Replit Auth, don't drop it.
+// Session storage table for user authentication sessions
 export const sessions = pgTable(
   "sessions",
   {
@@ -25,8 +24,7 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
-// User storage table.
-// (IMPORTANT) This table is mandatory for Replit Auth, don't drop it.
+// User storage table for GitSarva users
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().notNull(),
   email: varchar("email").unique(),
@@ -43,6 +41,12 @@ export const lessons = pgTable("lessons", {
   description: text("description"),
   content: text("content").notNull(),
   order: integer("order").notNull(),
+  difficulty: varchar("difficulty").default("beginner"), // beginner, intermediate, advanced
+  estimatedMinutes: integer("estimated_minutes").default(10),
+  category: varchar("category").default("foundation"), // foundation, practical, advanced
+  prerequisites: text("prerequisites"), // JSON array of lesson IDs that should be completed first
+  learningObjectives: text("learning_objectives"), // JSON array of what students will learn
+  realWorldContext: text("real_world_context"), // How this applies to actual development
   isCompleted: boolean("is_completed").default(false),
   createdAt: timestamp("created_at").defaultNow(),
 });

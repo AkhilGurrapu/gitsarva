@@ -147,7 +147,7 @@ export default function ExplanationPanel({ currentCommand, repositoryState }: Ex
   const status = getCurrentStatus();
 
   return (
-    <div className="w-full max-w-2xl mx-auto bg-white dark:bg-card rounded-lg border border-border shadow-lg max-h-[80vh] overflow-hidden flex flex-col">
+    <div className="w-full max-w-2xl mx-auto bg-github-bg dark:bg-card rounded-lg border border-border shadow-lg max-h-[80vh] overflow-hidden flex flex-col">
       {/* Header */}
       <div className="p-4 sm:p-6 border-b border-border bg-gradient-to-r from-github-blue/10 to-blue-500/10 dark:from-github-blue/5 dark:to-blue-500/5">
         <div className="flex items-center justify-between">
@@ -169,7 +169,7 @@ export default function ExplanationPanel({ currentCommand, repositoryState }: Ex
 
       {/* Current Status */}
       {status && (
-        <div className="p-4 sm:p-6 bg-gray-50 dark:bg-muted/30 border-b border-border">
+        <div className="p-4 sm:p-6 bg-github-bg/50 dark:bg-muted/30 border-b border-border">
           <div className="flex items-center space-x-3">
             <status.icon className={`h-5 w-5 ${status.color}`} />
             <div>
@@ -219,7 +219,7 @@ export default function ExplanationPanel({ currentCommand, repositoryState }: Ex
             </div>
 
             {/* Commands */}
-            <div className="bg-gray-50 dark:bg-muted/50 rounded-lg p-4">
+            <div className="bg-github-bg/70 dark:bg-muted/50 rounded-lg p-4">
               <h4 className="text-sm font-semibold text-github-dark dark:text-foreground mb-3 flex items-center space-x-2">
                 <Target className="h-4 w-4" />
                 <span>Related Commands</span>
@@ -245,7 +245,7 @@ export default function ExplanationPanel({ currentCommand, repositoryState }: Ex
             </div>
 
             {/* Tips */}
-            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+            <div className="bg-github-blue/5 dark:bg-blue-900/20 rounded-lg p-4 border border-github-blue/20 dark:border-blue-800/30">
               <h4 className="text-sm font-semibold text-github-dark dark:text-foreground mb-3 flex items-center space-x-2">
                 <Lightbulb className="h-4 w-4 text-yellow-500" />
                 <span>Pro Tips</span>

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle, Circle, Play } from "lucide-react";
+import { CheckCircle, Circle } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
@@ -68,33 +68,6 @@ export default function TutorialSidebar() {
     },
   });
 
-  const startChallengeMutation = useMutation({
-    mutationFn: async () => {
-      await apiRequest('POST', '/api/achievements', {
-        achievement: 'challenge_started',
-      });
-    },
-    onSuccess: () => {
-      toast({
-        title: "Challenge Started!",
-        description: "Good luck with your Git challenge!",
-      });
-    },
-    onError: (error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
-    },
-  });
-
   const getLessonProgress = (lessonId: number) => {
     return progress.find(p => p.lessonId === lessonId);
   };
@@ -125,10 +98,6 @@ export default function TutorialSidebar() {
       default:
         return [];
     }
-  };
-
-  const handleStartChallenge = () => {
-    startChallengeMutation.mutate();
   };
 
   return (
@@ -240,14 +209,14 @@ export default function TutorialSidebar() {
       </div>
 
       <div className="p-4 border-t border-border">
-        <Button 
-          onClick={handleStartChallenge}
-          disabled={startChallengeMutation.isPending}
-          className="w-full bg-github-blue hover:bg-github-blue/90 text-white"
-        >
-          <Play className="mr-2 h-4 w-4" />
-          {startChallengeMutation.isPending ? "Starting..." : "Start Challenge"}
-        </Button>
+        <div className="text-center">
+          <p className="text-sm text-muted-foreground mb-2">
+            🎓 Ready to practice what you've learned?
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Use the Practice section to experiment in a safe sandbox environment
+          </p>
+        </div>
       </div>
     </aside>
   );

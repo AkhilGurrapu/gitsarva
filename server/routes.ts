@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth, isAuthenticated } from "./supabaseAuth";
 import { insertLessonSchema, insertUserProgressSchema, insertUserAchievementSchema, insertGitRepositorySchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -11,8 +11,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
+      const user = req.user;
       res.json(user);
     } catch (error) {
       console.error("Error fetching user:", error);
@@ -59,7 +58,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User progress routes
   app.get('/api/progress', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const progress = await storage.getUserProgress(userId);
       res.json(progress);
     } catch (error) {
@@ -70,7 +69,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/progress', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const progressData = insertUserProgressSchema.parse({
         ...req.body,
         userId,
@@ -86,7 +85,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Achievement routes
   app.get('/api/achievements', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const achievements = await storage.getUserAchievements(userId);
       res.json(achievements);
     } catch (error) {
@@ -97,7 +96,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/achievements', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const achievementData = insertUserAchievementSchema.parse({
         ...req.body,
         userId,
@@ -113,7 +112,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Git repository routes
   app.get('/api/repositories', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const repositories = await storage.getUserRepositories(userId);
       res.json(repositories);
     } catch (error) {
@@ -124,7 +123,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/repositories', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const repositoryData = insertGitRepositorySchema.parse({
         ...req.body,
         userId,

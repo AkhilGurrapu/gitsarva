@@ -1,9 +1,9 @@
-# Git Playground - Complete Application Architecture
+# GitSarva - Complete Application Architecture
 
 ## Project Overview
 
 ### Initial Requirements & Vision
-Git Playground is a progressive web application designed to teach Git and GitHub through interactive tutorials, visual sandbox environments, and hands-on challenges. The platform targets beginners to advanced users, providing a browser-first learning experience with offline capabilities.
+GitSarva is a progressive web application designed to teach Git and GitHub through interactive tutorials, visual sandbox environments, and hands-on challenges. The platform targets beginners to advanced users, providing a browser-first learning experience with offline capabilities.
 
 **Core Objectives:**
 - Make Git accessible through visual learning
@@ -45,6 +45,10 @@ Git Playground is a progressive web application designed to teach Git and GitHub
 - `CompactTutorialSidebar` - Collapsible lesson navigation with progress indicators
 - `Home` - Main application container with resizable panel layout
 
+**Authentication Components:**
+- `LoginForm` - Modern login interface supporting email/password and guest login
+- `Landing` - Landing page with authentication flow
+
 **Interactive Learning Components:**
 - `TerminalPanel` - Interactive Git command interface with command history
 - `InteractiveGitVisualization` - Visual Git tree with D3.js-inspired rendering
@@ -76,16 +80,16 @@ Custom browser-based Git simulation engine providing:
 
 #### Core Technologies
 - **Express.js** server with TypeScript for REST API endpoints
-- **PostgreSQL** database with Neon serverless hosting
+- **PostgreSQL** database with Supabase hosting
 - **Drizzle ORM** for type-safe database operations and migrations
-- **Replit Authentication** integration with OpenID Connect
+- **Supabase Authentication** integration with simple development auth
 - **Session Management** using PostgreSQL store with express-session
 
 #### Database Schema Design
 **File:** `shared/schema.ts`
 
 ```sql
--- Core Authentication (Required for Replit Auth)
+-- Core Authentication
 sessions (sid, sess, expire) -- Session storage
 users (id, email, firstName, lastName, profileImageUrl, createdAt, updatedAt)
 
@@ -103,9 +107,9 @@ git_repositories (id, userId, name, state, createdAt, updatedAt)
 
 **Authentication Endpoints:**
 - `GET /api/auth/user` - Get current user profile
-- `GET /api/login` - Initiate OAuth login flow
-- `GET /api/callback` - Handle OAuth callback
-- `GET /api/logout` - Terminate session
+- `POST /api/auth/login` - Email/password authentication
+- `POST /api/auth/guest` - Guest user creation
+- `POST /api/auth/logout` - Terminate session
 
 **Learning Management:**
 - `GET /api/lessons` - Fetch all available lessons
@@ -119,25 +123,25 @@ git_repositories (id, userId, name, state, createdAt, updatedAt)
 - `PUT /api/repositories/:id` - Update repository state
 
 #### Authentication System
-**File:** `server/replitAuth.ts`
+**File:** `server/supabaseAuth.ts`
 
-**Replit OAuth Integration:**
-- OpenID Connect implementation with automatic token refresh
+**Simple Development Authentication:**
+- Email/password authentication with automatic user creation
+- Guest user creation with unique identifiers
 - Session-based authentication with PostgreSQL session storage
 - Middleware protection for authenticated routes
-- Automatic user profile synchronization
 
 **Security Features:**
 - Secure session cookies with httpOnly flag
-- CSRF protection through session-based authentication
-- Token refresh handling for long-lived sessions
+- Input validation and sanitization
+- SQL injection prevention through parameterized queries
 - Proper session cleanup on logout
 
 ### Data Flow Architecture
 
 #### User Authentication Flow
-1. **Login Initiation**: User clicks login → Redirect to `/api/login`
-2. **OAuth Flow**: Replit OAuth → User consent → Callback to `/api/callback`
+1. **Login Options**: User chooses email/password or guest login
+2. **Authentication**: Credentials validated or guest user created
 3. **Session Creation**: User profile stored → Session established → Redirect to app
 4. **State Hydration**: Frontend queries `/api/auth/user` → User context established
 
@@ -155,13 +159,55 @@ git_repositories (id, userId, name, state, createdAt, updatedAt)
 4. **UI Synchronization**: All components update simultaneously
 5. **Persistence**: Repository state optionally saved to database
 
+## Migration History
+
+### 🔄 Major Migration: Replit to Supabase (January 2025)
+
+**Complete Platform Independence Migration:**
+- **Removed Replit Dependencies**: Eliminated all Replit-specific packages and configurations
+- **Database Migration**: Migrated from Replit/Neon to Supabase PostgreSQL
+- **Authentication Overhaul**: Replaced Replit OAuth with simple development authentication
+- **Infrastructure Independence**: Created fully standalone application
+
+#### Authentication System Migration
+**Removed:**
+- Replit OAuth/OpenID Connect integration
+- `passport` and `passport-local` packages
+- `openid-client` dependency
+- Complex OAuth callback flows
+
+**Added:**
+- Simple email/password authentication
+- Guest user creation system
+- Session-based authentication
+- Modern `LoginForm` component
+
+#### Database & Infrastructure
+**Migration Steps:**
+- Supabase project setup and PostgreSQL configuration
+- Database schema migration using Drizzle
+- Environment variable updates
+- Connection string migration
+
+**Files Created/Modified:**
+- `server/supabaseAuth.ts` - New authentication system
+- `env.template` - Environment configuration template
+- Updated `package.json` - Removed Replit packages
+- Updated `vite.config.ts` - Removed Replit Vite plugins
+
+#### Branding & Configuration
+- **GitSarva Branding**: Updated all references from "Git Playground" to "GitSarva"
+- **Custom Logo**: Added GS gradient icon throughout application
+- **Port Configuration**: Changed from port 5000 to 3000 (macOS compatibility)
+- **Environment Setup**: Added dotenv support for local development
+
 ## Implementation Status
 
 ### ✅ Completed Features
 
 #### Core Infrastructure
-- **Authentication System**: Complete Replit OAuth integration with session management
-- **Database Layer**: PostgreSQL with Drizzle ORM, all tables and relations defined
+- **Authentication System**: Complete Supabase integration with email/password and guest login
+- **Database Layer**: Supabase PostgreSQL with Drizzle ORM, all tables and relations defined
 - **API Layer**: RESTful endpoints for all core functionality
 - **Frontend Routing**: Wouter-based routing with protected routes
 
@@ -170,6 +216,7 @@ git_repositories (id, userId, name, state, createdAt, updatedAt)
 - **Modern Design**: GitHub-inspired color scheme with Inter and JetBrains Mono fonts
 - **Theme Support**: Light/dark mode with system preference detection
 - **Component Library**: Complete shadcn/ui integration with custom styling
+- **Login Interface**: Modern login form with email/password and guest options
 
 #### Git Learning Engine
 - **Command Processing**: Full Git command simulation (init, add, commit, status, log, branch, checkout)
@@ -192,17 +239,24 @@ git_repositories (id, userId, name, state, createdAt, updatedAt)
 
 ### 🔄 Recent Major Updates
 
-#### UI/UX Improvements (July 2025)
+#### Platform Migration (January 2025)
+- **Complete Replit Removal**: Eliminated all Replit dependencies and references
+- **Supabase Integration**: Migrated to Supabase PostgreSQL with authentication
+- **Standalone Application**: Created fully independent development environment
+- **Branding Update**: Complete GitSarva rebrand with custom logo
+
+#### UI/UX Improvements (January 2025)
 - **Layout Redesign**: Streamlined 2-column responsive layout
 - **Panel Resizing**: All 4 panels support drag-to-resize functionality
 - **Sidebar Enhancement**: Collapsible tutorial sidebar with improved navigation
 - **Visual Hierarchy**: Cleaner design reducing cognitive load
 
-#### Technical Fixes (July 2025)
+#### Technical Fixes (January 2025)
 - **State Synchronization**: Fixed Git command sync across all components
 - **Command Execution**: Eliminated double execution issues
 - **Terminal Clearing**: All executed commands properly clear from input
 - **Error Handling**: Improved error states and user feedback
+- **TypeScript Fixes**: Resolved type errors in user and progress data
 
 ### 🚧 Areas for Enhancement
 
@@ -245,10 +299,10 @@ git_repositories (id, userId, name, state, createdAt, updatedAt)
 {
   "express": "^4.x", // Web framework
   "drizzle-orm": "^0.x", // Type-safe ORM
-  "@neondatabase/serverless": "^0.x", // PostgreSQL driver
+  "@supabase/supabase-js": "^2.x", // Supabase client
   "express-session": "^1.x", // Session management
-  "passport": "^0.x", // Authentication middleware
-  "openid-client": "^5.x" // OpenID Connect client
+  "dotenv": "^16.x", // Environment variable loading
+  "bcryptjs": "^2.x" // Password hashing
 }
 ```
 
@@ -267,10 +321,10 @@ git_repositories (id, userId, name, state, createdAt, updatedAt)
 ## Deployment Architecture
 
 ### Development Environment
-- **Frontend**: Vite dev server with HMR on port 5000
+- **Frontend**: Vite dev server with HMR on port 3000
 - **Backend**: Express server with tsx for TypeScript execution
-- **Database**: Neon PostgreSQL with connection pooling
-- **Authentication**: Replit OAuth with development domain support
+- **Database**: Supabase PostgreSQL with connection pooling
+- **Authentication**: Simple email/password with session management
 
 ### Production Strategy
 - **Frontend Build**: Vite static asset generation with optimization
@@ -282,11 +336,10 @@ git_repositories (id, userId, name, state, createdAt, updatedAt)
 ### Environment Configuration
 ```bash
 # Required Environment Variables
-DATABASE_URL=postgresql://...  # Neon PostgreSQL connection
-SESSION_SECRET=...            # Session encryption key
-REPL_ID=...                   # Replit application ID
-ISSUER_URL=...               # OAuth issuer endpoint
-REPLIT_DOMAINS=...           # Allowed OAuth domains
+DATABASE_URL=postgresql://...        # Supabase PostgreSQL connection
+SESSION_SECRET=...                   # Session encryption key
+SUPABASE_URL=...                    # Supabase project URL
+SUPABASE_ANON_KEY=...              # Supabase anonymous key
 ```
 
 ## File Structure Overview
@@ -297,6 +350,7 @@ REPLIT_DOMAINS=...           # Allowed OAuth domains
 │   │   ├── components/       # Reusable UI components
 │   │   │   ├── ui/          # shadcn/ui component library
 │   │   │   ├── AppHeader.tsx
+│   │   │   ├── LoginForm.tsx # Authentication interface
 │   │   │   ├── TerminalPanel.tsx
 │   │   │   ├── InteractiveGitVisualization.tsx
 │   │   │   └── ...
@@ -315,10 +369,11 @@ REPLIT_DOMAINS=...           # Allowed OAuth domains
 │   ├── routes.ts           # API route definitions
 │   ├── storage.ts          # Database access layer
 │   ├── db.ts               # Database connection
-│   ├── replitAuth.ts       # Authentication middleware
+│   ├── supabaseAuth.ts     # Authentication middleware
 │   └── vite.ts             # Development server integration
 ├── shared/                 # Shared TypeScript definitions
 │   └── schema.ts           # Database schema and types
+├── env.template           # Environment configuration template
 ├── package.json            # Project dependencies
 ├── vite.config.ts         # Build configuration
 ├── tailwind.config.ts     # Styling configuration
@@ -334,7 +389,7 @@ REPLIT_DOMAINS=...           # Allowed OAuth domains
 - **State Efficiency**: Minimal re-renders through proper state management
 
 ### Scalability Measures
-- **Database Connection Pooling**: Neon serverless with automatic scaling
+- **Database Connection Pooling**: Supabase serverless with automatic scaling
 - **Session Storage**: PostgreSQL-based sessions for multi-instance support
 - **Static Asset CDN**: Potential integration with CDN for asset delivery
 - **API Rate Limiting**: Express middleware for API protection
@@ -342,10 +397,10 @@ REPLIT_DOMAINS=...           # Allowed OAuth domains
 ## Security Implementation
 
 ### Authentication Security
-- **OAuth 2.0/OpenID Connect**: Industry-standard authentication
+- **Session-based Authentication**: Secure session management with PostgreSQL storage
+- **Password Security**: bcrypt hashing for password storage
 - **Session Security**: httpOnly cookies with secure flags
-- **CSRF Protection**: Session-based CSRF prevention
-- **Token Refresh**: Automatic token renewal for long sessions
+- **Input Validation**: Comprehensive input sanitization and validation
 
 ### Data Protection
 - **Input Validation**: Zod schema validation on all endpoints
@@ -369,6 +424,12 @@ REPLIT_DOMAINS=...           # Allowed OAuth domains
 
 ## Conclusion
 
-Git Playground represents a comprehensive implementation of an interactive Git learning platform. The application successfully combines modern web technologies with educational best practices to create an engaging, scalable, and maintainable learning environment.
+GitSarva represents a comprehensive implementation of an interactive Git learning platform. The application has successfully migrated from a Replit-dependent system to a fully independent, modern web application powered by Supabase.
 
-The current implementation provides a solid foundation with room for future enhancements in advanced Git features, AI-driven personalization, and expanded collaborative capabilities. The clean architecture and comprehensive documentation ensure the platform can evolve to meet growing user needs while maintaining code quality and performance standards.
+The recent migration work has created a solid, scalable foundation with:
+- **Complete Platform Independence**: No external platform dependencies
+- **Modern Authentication**: Simple yet secure authentication system
+- **Robust Infrastructure**: Supabase-powered backend with PostgreSQL
+- **Clean Codebase**: Removed legacy dependencies and updated branding
+
+The current implementation provides an excellent foundation with room for future enhancements in advanced Git features, AI-driven personalization, and expanded collaborative capabilities. The clean architecture and comprehensive documentation ensure the platform can evolve to meet growing user needs while maintaining code quality and performance standards.

@@ -7,27 +7,46 @@ import CompactTutorialSidebar from "@/components/CompactTutorialSidebar";
 import TerminalPanel from "@/components/TerminalPanel";
 import InteractiveGitVisualization from "@/components/InteractiveGitVisualization";
 import ExplanationPanel from "@/components/ExplanationPanel";
-import InstructionModal from "@/components/InstructionModal";
 import InteractiveCommandHelper from "@/components/InteractiveCommandHelper";
-import IntroWalkthrough from "@/components/IntroWalkthrough";
+import InteractiveOverlayWalkthrough from "@/components/InteractiveOverlayWalkthrough";
+import LessonModal from "@/components/LessonModal";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { useGitEngine } from "@/lib/gitEngine";
 import { Lightbulb } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useQuery } from "@tanstack/react-query";
+
+interface Lesson {
+  id: number;
+  title: string;
+  description: string;
+  content: string;
+  difficulty?: string;
+  estimatedMinutes?: number;
+  category?: string;
+  learningObjectives?: string;
+  realWorldContext?: string;
+}
 
 export default function Home() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading } = useAuth();
   const { getRepositoryState, executeCommand } = useGitEngine();
   const [lastCommand, setLastCommand] = useState<string>("");
-  const [showInstructions, setShowInstructions] = useState(false);
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
   const [showIntroWalkthrough, setShowIntroWalkthrough] = useState(false);
   const [tutorialCollapsed, setTutorialCollapsed] = useState(false);
+  const [currentLessonId, setCurrentLessonId] = useState<number | null>(null);
+  const [showLessonModal, setShowLessonModal] = useState(false);
+  
+  // Fetch lessons data
+  const { data: lessons = [] } = useQuery<Lesson[]>({
+    queryKey: ['/api/lessons'],
+  });
   
   // Show walkthrough for first-time users
   useEffect(() => {
-    const hasSeenWalkthrough = localStorage.getItem('git-playground-walkthrough-seen');
+    const hasSeenWalkthrough = localStorage.getItem('gitsarva-walkthrough-seen');
     if (!hasSeenWalkthrough && isAuthenticated && !isLoading) {
       setShowIntroWalkthrough(true);
     }
@@ -36,12 +55,12 @@ export default function Home() {
   const repositoryState = getRepositoryState();
   const [showExplanationPanel, setShowExplanationPanel] = useState(false);
 
-  // Show welcome instructions for new users
-  useEffect(() => {
-    if (isAuthenticated && !repositoryState.initialized) {
-      setShowInstructions(true);
-    }
-  }, [isAuthenticated, repositoryState.initialized]);
+  // Disable the welcome instructions popup - users can learn through the interactive walkthrough instead
+  // useEffect(() => {
+  //   if (isAuthenticated && !repositoryState.initialized) {
+  //     setShowInstructions(true);
+  //   }
+  // }, [isAuthenticated, repositoryState.initialized]);
 
   // Redirect to home if not authenticated
   useEffect(() => {
@@ -64,14 +83,29 @@ export default function Home() {
   };
 
   const handleStartLesson = (lessonId: number) => {
-    setShowInstructions(true);
-    // Start with the first command for lesson 1
-    if (lessonId === 1) {
-      setTimeout(() => {
-        setShowInstructions(false);
-        setLastCommand('git init'); // This will suggest the command in terminal
-      }, 2000);
-    }
+    setCurrentLessonId(lessonId);
+    setShowLessonModal(true);
+  };
+
+  const handleLessonCommand = (command: string) => {
+    setLastCommand(command);
+    // Focus the terminal after suggesting a command
+    setTimeout(() => {
+      const terminalInput = document.querySelector('input[type="text"]') as HTMLInputElement;
+      if (terminalInput) {
+        terminalInput.focus();
+      }
+    }, 100);
+  };
+
+  const handleCloseLessonModal = () => {
+    setShowLessonModal(false);
+    setCurrentLessonId(null);
+  };
+
+  const getCurrentLesson = (): Lesson | null => {
+    if (!currentLessonId || !lessons.length) return null;
+    return lessons.find(lesson => lesson.id === currentLessonId) || null;
   };
 
   if (isLoading) {
@@ -95,7 +129,7 @@ export default function Home() {
       {/* Mobile Tutorial Sidebar Overlay */}
       {showMobileSidebar && (
         <div className="lg:hidden fixed inset-0 z-50 bg-black/50" onClick={() => setShowMobileSidebar(false)}>
-          <div className="absolute left-0 top-16 bottom-0 w-80 bg-github-bg dark:bg-background border-r border-border" onClick={(e) => e.stopPropagation()}>
+          <div className="absolute left-0 top-16 bottom-0 w-4/5 max-w-sm bg-github-bg dark:bg-background border-r border-border transition-transform duration-300" onClick={(e) => e.stopPropagation()}>
             <CompactTutorialSidebar 
               onStartWalkthrough={() => setShowIntroWalkthrough(true)}
               onStartLesson={handleStartLesson}
@@ -104,14 +138,15 @@ export default function Home() {
         </div>
       )}
 
-      <div className="flex h-screen pt-16">
-        <ResizablePanelGroup direction="horizontal">
-          {/* Collapsible Tutorial Sidebar */}
+      <div className="flex h-screen pt-16 overflow-hidden">
+        <ResizablePanelGroup direction="horizontal" className="w-full h-full">
+          {/* Tutorial Sidebar - Always present as ResizablePanel */}
           <ResizablePanel
-            defaultSize={tutorialCollapsed ? 5 : 25}
-            minSize={5}
-            maxSize={40}
-            className="hidden lg:block"
+            defaultSize={tutorialCollapsed ? 3 : 25}
+            minSize={tutorialCollapsed ? 3 : 20}
+            maxSize={tutorialCollapsed ? 3 : 40}
+            className="hidden lg:block transition-all duration-300"
+            data-walkthrough="tutorial-sidebar"
           >
             <CompactTutorialSidebar 
               collapsed={tutorialCollapsed}
@@ -121,44 +156,73 @@ export default function Home() {
             />
           </ResizablePanel>
           
-          {!tutorialCollapsed && <ResizableHandle withHandle />}
+          <ResizableHandle withHandle />
           
           {/* Main Content Area - Resizable Panels */}
-          <ResizablePanel defaultSize={tutorialCollapsed ? 95 : 75} minSize={60}>
-            <ResizablePanelGroup direction="horizontal">
+          <ResizablePanel 
+            defaultSize={tutorialCollapsed ? 97 : 75} 
+            minSize={50}
+            className="flex-1"
+          >
+            <ResizablePanelGroup direction="horizontal" className="w-full h-full min-w-0">
               {/* Left Panel: Terminal & Command Helper */}
-              <ResizablePanel defaultSize={50} minSize={30}>
-                <ResizablePanelGroup direction="vertical">
-                  {/* Terminal Panel */}
-                  <ResizablePanel defaultSize={60} minSize={30}>
-                    <div className="h-full bg-white dark:bg-card">
-                      <TerminalPanel 
-                        onCommandExecuted={setLastCommand}
-                        suggestedCommand={lastCommand}
-                      />
-                    </div>
-                  </ResizablePanel>
-                  
-                  <ResizableHandle withHandle />
-                  
-                  {/* Command Helper Panel */}
-                  <ResizablePanel defaultSize={40} minSize={20}>
-                    <div className="h-full border-t border-border">
-                      <InteractiveCommandHelper
-                        repositoryState={repositoryState}
-                        onSuggestCommand={handleCommandSuggestion}
-                        lastCommand={lastCommand}
-                      />
-                    </div>
-                  </ResizablePanel>
-                </ResizablePanelGroup>
+              <ResizablePanel 
+                defaultSize={42} 
+                minSize={35}
+                maxSize={60}
+                className="min-w-0"
+              >
+                <div className="h-full p-1 sm:p-2 lg:p-3 overflow-hidden">
+                  <ResizablePanelGroup direction="vertical" className="h-full min-h-0">
+                    {/* Terminal Panel */}
+                    <ResizablePanel 
+                      defaultSize={60} 
+                      minSize={30}
+                      maxSize={80}
+                      className="min-w-0"
+                      data-walkthrough="terminal-panel"
+                    >
+                      <div className="h-full bg-white dark:bg-card overflow-hidden">
+                        <TerminalPanel 
+                          onCommandExecuted={setLastCommand}
+                          suggestedCommand={lastCommand}
+                        />
+                      </div>
+                    </ResizablePanel>
+                    
+                    <ResizableHandle withHandle />
+                    
+                    {/* Command Helper Panel */}
+                    <ResizablePanel 
+                      defaultSize={40} 
+                      minSize={20}
+                      maxSize={70}
+                      className="min-w-0"
+                      data-walkthrough="command-helper"
+                    >
+                      <div className="h-full border-t border-border overflow-hidden">
+                        <InteractiveCommandHelper
+                          repositoryState={repositoryState}
+                          onSuggestCommand={handleCommandSuggestion}
+                          lastCommand={lastCommand}
+                        />
+                      </div>
+                    </ResizablePanel>
+                  </ResizablePanelGroup>
+                </div>
               </ResizablePanel>
               
               <ResizableHandle withHandle />
               
               {/* Right Panel: Git Visualization with floating explanation button */}
-              <ResizablePanel defaultSize={50} minSize={30}>
-                <div className="h-full bg-github-bg dark:bg-background p-4 relative">
+              <ResizablePanel 
+                defaultSize={58} 
+                minSize={40}
+                maxSize={65}
+                className="min-w-0"
+                data-walkthrough="git-visualization"
+              >
+                <div className="h-full bg-github-bg dark:bg-background p-1 sm:p-2 lg:p-3 relative overflow-hidden">
                   <InteractiveGitVisualization 
                     repositoryState={repositoryState}
                     onCommandSuggestion={handleCommandSuggestion}
@@ -167,10 +231,10 @@ export default function Home() {
                   {/* Floating explanation button */}
                   <button
                     onClick={() => setShowExplanationPanel(true)}
-                    className="absolute top-6 right-6 bg-github-blue hover:bg-github-blue/90 text-white p-3 rounded-full shadow-lg transition-colors z-10"
+                    className="absolute top-2 right-2 sm:top-4 sm:right-4 lg:top-6 lg:right-6 bg-github-blue hover:bg-github-blue/90 text-white p-2 sm:p-3 rounded-full shadow-lg transition-colors z-10"
                     title="Learn & Understand"
                   >
-                    <Lightbulb className="h-5 w-5" />
+                    <Lightbulb className="h-4 w-4 sm:h-5 sm:w-5" />
                   </button>
                 </div>
               </ResizablePanel>
@@ -179,21 +243,9 @@ export default function Home() {
         </ResizablePanelGroup>
       </div>
 
-      <InstructionModal
-        isOpen={showInstructions}
-        onClose={() => setShowInstructions(false)}
-        title="Welcome to Git Playground!"
-        content="Let's start your Git journey. Git is a powerful tool for tracking changes in your code. Think of it as a time machine for your projects!"
-        steps={[
-          "First, we'll initialize a Git repository with 'git init'",
-          "Then we'll add some files to track with 'git add'",
-          "Finally, we'll save our first snapshot with 'git commit'",
-          "You'll see everything visualized in real-time!"
-        ]}
-        onNext={() => handleCommandSuggestion('git init')}
-      />
+      {/* Removed the welcome popup - users learn through the interactive walkthrough instead */}
 
-      <IntroWalkthrough
+      <InteractiveOverlayWalkthrough
         isOpen={showIntroWalkthrough}
         onClose={() => setShowIntroWalkthrough(false)}
       />
@@ -213,6 +265,14 @@ export default function Home() {
           />
         </DialogContent>
       </Dialog>
+
+      {/* Lesson Modal */}
+      <LessonModal
+        isOpen={showLessonModal}
+        onClose={handleCloseLessonModal}
+        lesson={getCurrentLesson()}
+        onSuggestCommand={handleLessonCommand}
+      />
     </div>
   );
 }

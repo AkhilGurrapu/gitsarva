@@ -164,4 +164,24 @@
   .hover\:text-github-blue:hover {
     color: var(--github-blue);
   }
+
+  /* Prevent horizontal scrolling and improve responsiveness */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Better focus states for accessibility */
+  .focus-visible:focus {
+    @apply ring-2 ring-github-blue ring-offset-2 ring-offset-white dark:ring-offset-gray-900;
+  }
+}
+
+/* Ensure proper overflow handling */
+html, body {
+  overflow-x: hidden;
 }
