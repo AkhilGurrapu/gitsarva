@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Terminal, GitBranch, Users, Zap, Code, BookOpen, Play, RotateCcw } from "lucide-react";
+import { Terminal, GitBranch, Users, Zap, Code, BookOpen, Play, RotateCcw, HelpCircle, Eye, Lightbulb, Command } from "lucide-react";
 import TerminalPanel from "@/components/TerminalPanel";
 import InteractiveGitVisualization from "@/components/InteractiveGitVisualization";
 import InteractiveCommandHelper from "@/components/InteractiveCommandHelper";
@@ -12,6 +12,8 @@ import ExplanationPanel from "@/components/ExplanationPanel";
 import AppHeader from "@/components/AppHeader";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useGitEngine } from "@/lib/gitEngine";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface PracticeScenario {
   id: string;
@@ -218,8 +220,11 @@ const practiceScenarios: PracticeScenario[] = [
 export default function Practice() {
   const [selectedScenario, setSelectedScenario] = useState<PracticeScenario | null>(null);
   const [activeTab, setActiveTab] = useState("scenarios");
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [lastCommand, setLastCommand] = useState<string>("");
+  const [showVisualization, setShowVisualization] = useState(true);
+  const [showCommandHelper, setShowCommandHelper] = useState(false);
+  const [showExplanations, setShowExplanations] = useState(false);
+  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
   const { theme } = useTheme();
   const { getRepositoryState, executeCommand } = useGitEngine();
 
@@ -279,14 +284,52 @@ export default function Practice() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
-      {/* Consistent Header */}
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <AppHeader 
-        onToggleMobileSidebar={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
+        onToggleMobileSidebar={() => setShowMobileSidebar(!showMobileSidebar)}
+        onStartWalkthrough={() => {}}
       />
 
-      {/* Main Content - Allow full page scrolling */}
-      <div className="flex-1 overflow-auto">
+      {/* Mobile Sidebar Overlay */}
+      {showMobileSidebar && (
+        <div className="lg:hidden fixed inset-0 z-50 bg-black/50" onClick={() => setShowMobileSidebar(false)}>
+          <div className="absolute left-0 top-16 bottom-0 w-4/5 max-w-sm bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-transform duration-300" onClick={(e) => e.stopPropagation()}>
+            <div className="p-4">
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-4">Practice Navigation</h3>
+              <div className="space-y-2">
+                <Button 
+                  variant={activeTab === "scenarios" ? "default" : "outline"} 
+                  className="w-full justify-start"
+                  onClick={() => {setActiveTab("scenarios"); setShowMobileSidebar(false);}}
+                >
+                  <BookOpen className="h-4 w-4 mr-2" />
+                  Practice Scenarios
+                </Button>
+                <Button 
+                  variant={activeTab === "playground" ? "default" : "outline"} 
+                  className="w-full justify-start"
+                  onClick={() => {setActiveTab("playground"); setShowMobileSidebar(false);}}
+                  disabled={!selectedScenario}
+                >
+                  <Terminal className="h-4 w-4 mr-2" />
+                  Interactive Playground
+                </Button>
+                <Button 
+                  variant={activeTab === "free-play" ? "default" : "outline"} 
+                  className="w-full justify-start"
+                  onClick={() => {setActiveTab("free-play"); setShowMobileSidebar(false);}}
+                >
+                  <Zap className="h-4 w-4 mr-2" />
+                  Free Play
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="pt-16">
+        <TooltipProvider>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="min-h-full">
           {/* Page Header */}
           <div className="bg-gradient-to-r from-purple-600 via-blue-600 to-github-blue text-white">
@@ -317,16 +360,16 @@ export default function Practice() {
           {/* Tab Navigation */}
           <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-16 z-30">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
-              <TabsList className="grid w-full grid-cols-3 max-w-xs sm:max-w-md mx-auto">
-                <TabsTrigger value="scenarios" className="text-xs sm:text-sm">
+                <TabsList className="grid w-full grid-cols-3 max-w-xs sm:max-w-md mx-auto bg-gray-100 dark:bg-gray-700">
+                  <TabsTrigger value="scenarios" className="text-xs sm:text-sm text-gray-900 dark:text-gray-100 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-600 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white">
                   <span className="hidden sm:inline">Practice Scenarios</span>
                   <span className="sm:hidden">Scenarios</span>
                 </TabsTrigger>
-                <TabsTrigger value="playground" className="text-xs sm:text-sm">
+                  <TabsTrigger value="playground" className="text-xs sm:text-sm text-gray-900 dark:text-gray-100 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-600 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white">
                   <span className="hidden sm:inline">Interactive Playground</span>
                   <span className="sm:hidden">Playground</span>
                 </TabsTrigger>
-                <TabsTrigger value="free-play" className="text-xs sm:text-sm">
+                  <TabsTrigger value="free-play" className="text-xs sm:text-sm text-gray-900 dark:text-gray-100 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-600 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white">
                   <span className="hidden sm:inline">Free Play</span>
                   <span className="sm:hidden">Free Play</span>
                 </TabsTrigger>
@@ -340,28 +383,28 @@ export default function Practice() {
               {/* Filter & Selection */}
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-center">
                 <Select>
-                  <SelectTrigger className="w-full sm:w-48">
+                    <SelectTrigger className="w-full sm:w-48 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">
                     <SelectValue placeholder="Filter by difficulty" />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Levels</SelectItem>
-                    <SelectItem value="beginner">Beginner</SelectItem>
-                    <SelectItem value="intermediate">Intermediate</SelectItem>
-                    <SelectItem value="advanced">Advanced</SelectItem>
+                    <SelectContent className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600">
+                      <SelectItem value="all" className="text-gray-900 dark:text-gray-100">All Levels</SelectItem>
+                      <SelectItem value="beginner" className="text-gray-900 dark:text-gray-100">Beginner</SelectItem>
+                      <SelectItem value="intermediate" className="text-gray-900 dark:text-gray-100">Intermediate</SelectItem>
+                      <SelectItem value="advanced" className="text-gray-900 dark:text-gray-100">Advanced</SelectItem>
                   </SelectContent>
                 </Select>
                 
                 <Select>
-                  <SelectTrigger className="w-full sm:w-48">
+                    <SelectTrigger className="w-full sm:w-48 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">
                     <SelectValue placeholder="Filter by category" />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Categories</SelectItem>
-                    <SelectItem value="fundamentals">Fundamentals</SelectItem>
-                    <SelectItem value="branching">Branching</SelectItem>
-                    <SelectItem value="collaboration">Collaboration</SelectItem>
-                    <SelectItem value="advanced">Advanced</SelectItem>
-                    <SelectItem value="debugging">Debugging</SelectItem>
+                    <SelectContent className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600">
+                      <SelectItem value="all" className="text-gray-900 dark:text-gray-100">All Categories</SelectItem>
+                      <SelectItem value="fundamentals" className="text-gray-900 dark:text-gray-100">Fundamentals</SelectItem>
+                      <SelectItem value="branching" className="text-gray-900 dark:text-gray-100">Branching</SelectItem>
+                      <SelectItem value="collaboration" className="text-gray-900 dark:text-gray-100">Collaboration</SelectItem>
+                      <SelectItem value="advanced" className="text-gray-900 dark:text-gray-100">Advanced</SelectItem>
+                      <SelectItem value="debugging" className="text-gray-900 dark:text-gray-100">Debugging</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -433,49 +476,43 @@ export default function Practice() {
             </div>
           </TabsContent>
 
-          {/* Interactive Playground Tab */}
-          <TabsContent value="playground" className="flex-1 overflow-hidden">
+            {/* Modern Clean Playground Tab */}
+            <TabsContent value="playground" className="flex-1 min-h-[calc(100vh-8rem)]">
             {selectedScenario ? (
-              <div className="h-full">
+                <div className="h-full flex flex-col">
                 {/* Scenario Header */}
-                <div className="bg-gradient-to-r from-green-500 to-blue-500 text-white p-3 sm:p-4">
-                  <div className="max-w-7xl mx-auto">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
-                      <div className="flex items-center gap-3 sm:gap-4">
-                        <div className="p-2 rounded-lg bg-white/20 backdrop-blur-sm">
-                          <selectedScenario.icon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
-                        </div>
+                  <div className="bg-gradient-to-r from-green-500 to-blue-500 text-white p-4">
+                    <div className="max-w-7xl mx-auto flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <selectedScenario.icon className="h-6 w-6 text-white" />
                         <div>
-                          <h2 className="text-lg sm:text-xl font-semibold text-white">{selectedScenario.title}</h2>
-                          <p className="text-sm sm:text-base text-green-100">{selectedScenario.description}</p>
+                          <h2 className="text-xl font-semibold text-white">{selectedScenario.title}</h2>
+                          <p className="text-green-100 text-sm">{selectedScenario.description}</p>
                         </div>
                       </div>
-                      <div className="flex gap-2">
-                        <Badge className={`${getDifficultyColor(selectedScenario.difficulty)} border-white/20 text-xs sm:text-sm`}>
+                      <div className="flex items-center gap-2">
+                        <Badge className="bg-white/20 text-white border-white/30">
                           {selectedScenario.difficulty}
-                        </Badge>
-                        <Badge variant="outline" className="border-white/30 text-white text-xs sm:text-sm">
-                          {selectedScenario.category}
                         </Badge>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Scrollable 4-Panel Layout */}
-                <div className="flex-1 min-h-0">
-                  <div className="h-full flex flex-col lg:grid lg:grid-cols-12 lg:gap-1">
-                    {/* Terminal Panel - Always scrollable */}
-                    <div className="min-h-64 max-h-80 lg:h-full lg:col-span-6 bg-white dark:bg-gray-800 border-b lg:border-b-0 lg:border-r border-gray-200 dark:border-gray-700 flex flex-col" data-walkthrough="terminal-panel">
-                      <div className="flex-shrink-0 p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700">
-                        <h3 className="font-semibold text-base sm:text-lg flex items-center gap-2 text-gray-900 dark:text-gray-100">
-                          <Terminal className="h-4 w-4 sm:h-5 sm:w-5 text-github-blue" />
-                          <span className="hidden sm:inline">Interactive Terminal</span>
-                          <span className="sm:hidden">Terminal</span>
-                        </h3>
-                        <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">Practice Git commands in real-time</p>
+                  {/* Clean Modern Playground Layout */}
+                  <div className="flex-1 bg-gray-50 dark:bg-gray-900 flex">
+                    {/* Main Terminal Area - Takes center stage */}
+                    <div className="flex-1 flex flex-col">
+                      {/* Terminal */}
+                      <div className="flex-1 bg-gray-900 dark:bg-gray-950 m-4 rounded-lg overflow-hidden shadow-2xl border border-gray-700">
+                        <div className="bg-gray-800 px-4 py-2 flex items-center gap-2">
+                          <div className="flex gap-1">
+                            <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                            <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                </div>
+                          <span className="text-gray-300 text-sm font-mono">GitSarva Terminal</span>
                       </div>
-                      <div className="flex-1 min-h-0 overflow-auto">
+                        <div className="h-full">
                         <TerminalPanel 
                           onCommandExecuted={setLastCommand}
                           suggestedCommand={lastCommand}
@@ -483,34 +520,158 @@ export default function Practice() {
                       </div>
                     </div>
 
-                    {/* Right Side Panels */}
-                    <div className="flex-1 lg:col-span-6 flex flex-col min-h-0">
-                      {/* Git Visualization - Scrollable */}
-                      <div className="min-h-64 max-h-80 lg:flex-1 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex flex-col" data-walkthrough="git-visualization">
-                        <div className="flex-shrink-0 p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700">
-                          <h3 className="font-semibold text-base sm:text-lg flex items-center gap-2 text-gray-900 dark:text-gray-100">
-                            <GitBranch className="h-4 w-4 sm:h-5 sm:w-5 text-github-blue" />
-                            <span className="hidden sm:inline">Git Visualization</span>
-                            <span className="sm:hidden">Visualization</span>
-                          </h3>
-                          <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">Watch your repository evolve</p>
+                      {/* Helper Tool Icons Bar */}
+                      <div className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4">
+                        <div className="flex items-center justify-center gap-4">
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant={showVisualization ? "default" : "outline"}
+                                size="sm"
+                                onClick={() => setShowVisualization(!showVisualization)}
+                                className={`gap-2 ${showVisualization 
+                                  ? 'bg-github-blue text-white hover:bg-github-blue/90' 
+                                  : 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
+                                }`}
+                              >
+                                <Eye className="h-4 w-4" />
+                                Visualization
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Toggle Git tree visualization</TooltipContent>
+                          </Tooltip>
+
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant={showCommandHelper ? "default" : "outline"}
+                                size="sm"
+                                onClick={() => setShowCommandHelper(!showCommandHelper)}
+                                className={`gap-2 ${showCommandHelper 
+                                  ? 'bg-github-blue text-white hover:bg-github-blue/90' 
+                                  : 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
+                                }`}
+                              >
+                                <Command className="h-4 w-4" />
+                                Commands
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Toggle command helper</TooltipContent>
+                          </Tooltip>
+
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant={showExplanations ? "default" : "outline"}
+                                size="sm"
+                                onClick={() => setShowExplanations(!showExplanations)}
+                                className={`gap-2 ${showExplanations 
+                                  ? 'bg-github-blue text-white hover:bg-github-blue/90' 
+                                  : 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
+                                }`}
+                              >
+                                <Lightbulb className="h-4 w-4" />
+                                Explain
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Toggle explanations panel</TooltipContent>
+                          </Tooltip>
+
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button variant="outline" size="sm" className="gap-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                <HelpCircle className="h-4 w-4" />
+                                Guide
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                              <DialogHeader>
+                                <DialogTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                                  <BookOpen className="h-5 w-5" />
+                                  {selectedScenario.title} - Practice Guide
+                                </DialogTitle>
+                              </DialogHeader>
+                              <div className="space-y-6">
+                                {/* Objectives */}
+                                <div>
+                                  <h3 className="font-medium mb-3 text-lg text-gray-900 dark:text-gray-100">Learning Objectives</h3>
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    {selectedScenario.objectives.map((objective, index) => (
+                                      <div key={index} className="flex items-center gap-2 p-3 rounded-lg bg-gray-50 dark:bg-gray-700">
+                                        <div className="w-2 h-2 bg-github-blue rounded-full" />
+                                        <span className="text-sm text-gray-900 dark:text-gray-100">{objective}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+
+                                {/* Steps */}
+                                {selectedScenario.steps && (
+                                  <div>
+                                    <h3 className="font-medium mb-4 text-lg text-gray-900 dark:text-gray-100">Step-by-Step Guide</h3>
+                                    <div className="space-y-4">
+                                      {selectedScenario.steps.map((step, index) => (
+                                        <Card key={index} className="p-4 border-l-4 border-l-github-blue bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600">
+                                          <div className="space-y-3">
+                                            <div className="flex items-center gap-3">
+                                              <Badge className="bg-github-blue text-white">
+                                                Step {step.step}
+                                              </Badge>
+                                              <h4 className="font-medium text-gray-900 dark:text-gray-100">{step.title}</h4>
+                                            </div>
+                                            <p className="text-sm text-gray-600 dark:text-gray-400">{step.description}</p>
+                                            {step.command && (
+                                              <div className="bg-gray-900 rounded p-3">
+                                                <code className="text-green-400 font-mono text-sm">$ {step.command}</code>
+                                              </div>
+                                            )}
+                                            {step.hint && (
+                                              <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded p-3">
+                                                <p className="text-sm text-blue-800 dark:text-blue-200">💡 {step.hint}</p>
+                                              </div>
+                                            )}
+                                          </div>
+                                        </Card>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </DialogContent>
+                          </Dialog>
                         </div>
-                        <div className="flex-1 min-h-0 overflow-auto">
+                      </div>
+                    </div>
+
+                    {/* Dynamic Side Panel */}
+                    {(showVisualization || showCommandHelper || showExplanations) && (
+                      <div className="w-96 bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 flex flex-col">
+                        {showVisualization && (
+                          <div className="flex-1 border-b border-gray-200 dark:border-gray-700">
+                            <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                              <h3 className="font-medium flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                                <GitBranch className="h-4 w-4" />
+                                Git Visualization
+                              </h3>
+                            </div>
+                            <div className="flex-1 overflow-hidden">
                           <InteractiveGitVisualization 
                             repositoryState={repositoryState}
                             onCommandSuggestion={handleCommandSuggestion}
                           />
                         </div>
                       </div>
+                        )}
 
-                      {/* Bottom Panels - All scrollable */}
-                      <div className="flex-1 lg:flex-1 flex flex-col sm:grid sm:grid-cols-2 lg:grid-cols-2 min-h-0">
-                        {/* Command Helper - Full scroll capability */}
-                        <div className="min-h-48 sm:h-auto bg-white dark:bg-gray-800 border-b sm:border-b-0 sm:border-r border-gray-200 dark:border-gray-700 flex flex-col" data-walkthrough="command-helper">
-                          <div className="flex-shrink-0 p-2 sm:p-3 border-b border-gray-200 dark:border-gray-700">
-                            <h4 className="font-medium text-sm text-gray-900 dark:text-gray-100">Command Helper</h4>
+                        {showCommandHelper && (
+                          <div className="flex-1 border-b border-gray-200 dark:border-gray-700">
+                            <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                              <h3 className="font-medium flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                                <Command className="h-4 w-4" />
+                                Command Helper
+                              </h3>
                           </div>
-                          <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
+                            <div className="flex-1 overflow-auto">
                             <InteractiveCommandHelper 
                               repositoryState={repositoryState}
                               onSuggestCommand={handleCommandSuggestion}
@@ -518,96 +679,26 @@ export default function Practice() {
                             />
                           </div>
                         </div>
+                        )}
 
-                        {/* Explanation Panel - Full scroll capability */}
-                        <div className="min-h-48 sm:h-auto bg-white dark:bg-gray-800 flex flex-col" data-walkthrough="explanation-panel">
-                          <div className="flex-shrink-0 p-2 sm:p-3 border-b border-gray-200 dark:border-gray-700">
-                            <h4 className="font-medium text-sm text-gray-900 dark:text-gray-100">Explanations</h4>
+                        {showExplanations && (
+                          <div className="flex-1">
+                            <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                              <h3 className="font-medium flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                                <Lightbulb className="h-4 w-4" />
+                                Explanations
+                              </h3>
                           </div>
-                          <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
+                            <div className="flex-1 overflow-auto">
                             <ExplanationPanel 
                               currentCommand={lastCommand}
                               repositoryState={repositoryState}
                             />
                           </div>
                         </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Scrollable Objectives and Steps Panel */}
-                <div className="flex-shrink-0 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 max-h-96 overflow-y-auto">
-                  <div className="p-4 sm:p-6">
-                    <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
-                      {/* Objectives */}
-                      <div>
-                        <h3 className="font-medium mb-3 flex items-center gap-2 text-gray-900 dark:text-gray-100">
-                          <BookOpen className="h-4 w-4" />
-                          Practice Objectives for {selectedScenario.title}
-                        </h3>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                          {selectedScenario.objectives.map((objective, index) => (
-                            <div key={index} className="flex items-center gap-2 p-3 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-                              <div className="w-2 h-2 bg-github-blue rounded-full flex-shrink-0" />
-                              <span className="text-sm text-gray-700 dark:text-gray-300">{objective}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Step-by-Step Guide */}
-                      {selectedScenario.steps && selectedScenario.steps.length > 0 && (
-                        <div>
-                          <h3 className="font-medium mb-4 flex items-center gap-2 text-gray-900 dark:text-gray-100">
-                            <Terminal className="h-4 w-4" />
-                            Step-by-Step Guide
-                          </h3>
-                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                            {selectedScenario.steps.map((step, index) => (
-                              <Card key={index} className="p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 border-l-4 border-l-github-blue">
-                                <div className="space-y-3">
-                                  <div className="flex items-center gap-3">
-                                    <Badge className="bg-github-blue text-white px-2 py-1 text-xs">
-                                      Step {step.step}
-                                    </Badge>
-                                    <h4 className="font-medium text-sm text-gray-900 dark:text-gray-100">{step.title}</h4>
-                                  </div>
-                                  
-                                  <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                                    {step.description}
-                                  </p>
-                                  
-                                  {step.command && (
-                                    <div className="space-y-2">
-                                      <div className="bg-gray-900 dark:bg-gray-950 rounded-md p-3">
-                                        <code className="text-green-400 text-sm font-mono">
-                                          $ {step.command}
-                                        </code>
-                                      </div>
-                                      {step.expectedOutput && (
-                                        <p className="text-xs text-gray-600 dark:text-gray-400">
-                                          Expected: {step.expectedOutput}
-                                        </p>
-                                      )}
-                                    </div>
-                                  )}
-                                  
-                                  {step.hint && (
-                                    <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-md p-3">
-                                      <p className="text-xs text-blue-800 dark:text-blue-200">
-                                        💡 <strong>Hint:</strong> {step.hint}
-                                      </p>
-                                    </div>
-                                  )}
-                                </div>
-                              </Card>
-                            ))}
-                          </div>
+                        )}
                         </div>
                       )}
-                    </div>
-                  </div>
                 </div>
               </div>
             ) : (
@@ -616,9 +707,9 @@ export default function Practice() {
                   <div className="w-16 h-16 bg-gradient-to-br from-github-blue to-purple-600 rounded-full flex items-center justify-center mx-auto">
                     <Play className="h-8 w-8 text-white" />
                   </div>
-                  <h3 className="text-xl font-semibold">Ready to Practice?</h3>
-                  <p className="text-muted-foreground max-w-md">
-                    Select a practice scenario to start your interactive Git learning journey with full terminal and visualization support.
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Ready to Practice?</h3>
+                    <p className="text-gray-600 dark:text-gray-400 max-w-md">
+                      Select a practice scenario to start your interactive Git learning journey.
                   </p>
                   <Button onClick={() => setActiveTab("scenarios")} className="gap-2">
                     <BookOpen className="h-4 w-4" />
@@ -629,58 +720,96 @@ export default function Practice() {
             )}
           </TabsContent>
 
-          {/* Free Play Tab */}
-          <TabsContent value="free-play" className="flex-1 overflow-hidden">
-            <div className="h-full">
+            {/* Free Play Tab - Also with clean design */}
+            <TabsContent value="free-play" className="flex-1 min-h-[calc(100vh-8rem)]">
+              <div className="h-full flex flex-col">
               {/* Free Play Header */}
-              <div className="bg-gradient-to-r from-purple-500 to-blue-500 text-white p-6">
-                <div className="max-w-7xl mx-auto">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 rounded-full bg-white/20 backdrop-blur-sm">
+                <div className="bg-gradient-to-r from-purple-500 to-blue-500 text-white p-4">
+                  <div className="max-w-7xl mx-auto flex items-center gap-4">
                       <Zap className="h-6 w-6 text-white" />
-                    </div>
                     <div>
-                      <h2 className="text-2xl font-bold">Free Play Mode</h2>
-                      <p className="text-purple-100">
-                        Experiment freely with Git commands in an unrestricted sandbox environment
+                      <h2 className="text-xl font-bold text-white">Free Play Mode</h2>
+                      <p className="text-purple-100 text-sm">
+                        Experiment freely with Git commands in an unrestricted environment
                       </p>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* 4-Panel Layout matching home page */}
-              <div className="flex-1 h-full grid grid-cols-12 gap-1">
-                {/* Terminal Panel (left) */}
-                <div className="col-span-6 bg-white dark:bg-gray-800 border-r border-border">
-                  <div className="h-full flex flex-col">
-                    <div className="p-4 border-b border-border">
-                      <h3 className="font-semibold text-lg flex items-center gap-2">
-                        <Terminal className="h-5 w-5 text-github-blue" />
-                        Free Play Terminal
-                      </h3>
-                      <p className="text-sm text-muted-foreground">Experiment with any Git commands</p>
+                {/* Clean Free Play Layout */}
+                <div className="flex-1 bg-gray-50 dark:bg-gray-900 flex">
+                  {/* Terminal */}
+                  <div className="flex-1 flex flex-col">
+                    <div className="flex-1 bg-gray-900 dark:bg-gray-950 m-4 rounded-lg overflow-hidden shadow-2xl border border-gray-700">
+                      <div className="bg-gray-800 px-4 py-2 flex items-center gap-2">
+                        <div className="flex gap-1">
+                          <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                          <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+              </div>
+                        <span className="text-gray-300 text-sm font-mono">Free Play Terminal</span>
                     </div>
-                    <div className="flex-1 overflow-hidden">
+                      <div className="h-full">
                       <TerminalPanel 
                         onCommandExecuted={setLastCommand}
                         suggestedCommand={lastCommand}
                       />
-                    </div>
                   </div>
                 </div>
 
-                {/* Right side */}
-                <div className="col-span-6 flex flex-col">
-                  {/* Git Visualization */}
-                  <div className="flex-1 bg-white dark:bg-gray-800 border-b border-border">
-                    <div className="h-full flex flex-col">
-                      <div className="p-4 border-b border-border">
-                        <h3 className="font-semibold text-lg flex items-center gap-2">
-                          <GitBranch className="h-5 w-5 text-github-blue" />
-                          Repository Visualization
-                        </h3>
-                        <p className="text-sm text-muted-foreground">Watch your experiments in real-time</p>
+                    {/* Helper Tools */}
+                    <div className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4">
+                      <div className="flex items-center justify-center gap-4">
+                        <Button
+                          variant={showVisualization ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setShowVisualization(!showVisualization)}
+                          className={`gap-2 ${showVisualization 
+                            ? 'bg-github-blue text-white hover:bg-github-blue/90' 
+                            : 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
+                          }`}
+                        >
+                          <Eye className="h-4 w-4" />
+                          Visualization
+                        </Button>
+                        <Button
+                          variant={showCommandHelper ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setShowCommandHelper(!showCommandHelper)}
+                          className={`gap-2 ${showCommandHelper 
+                            ? 'bg-github-blue text-white hover:bg-github-blue/90' 
+                            : 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
+                          }`}
+                        >
+                          <Command className="h-4 w-4" />
+                          Commands
+                        </Button>
+                        <Button
+                          variant={showExplanations ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setShowExplanations(!showExplanations)}
+                          className={`gap-2 ${showExplanations 
+                            ? 'bg-github-blue text-white hover:bg-github-blue/90' 
+                            : 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
+                          }`}
+                        >
+                          <Lightbulb className="h-4 w-4" />
+                          Explain
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Dynamic Side Panel */}
+                  {(showVisualization || showCommandHelper || showExplanations) && (
+                    <div className="w-96 bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 flex flex-col">
+                      {showVisualization && (
+                        <div className="flex-1 border-b border-gray-200 dark:border-gray-700">
+                          <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                            <h3 className="font-medium flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                              <GitBranch className="h-4 w-4" />
+                              Git Visualization
+                            </h3>
                       </div>
                       <div className="flex-1 overflow-hidden">
                         <InteractiveGitVisualization 
@@ -689,16 +818,17 @@ export default function Practice() {
                         />
                       </div>
                     </div>
-                  </div>
+                      )}
 
-                  {/* Bottom right panels */}
-                  <div className="flex-1 grid grid-cols-2">
-                    <div className="bg-white dark:bg-gray-800 border-r border-border">
-                      <div className="h-full flex flex-col">
-                        <div className="p-3 border-b border-border">
-                          <h4 className="font-medium text-sm">Command Helper</h4>
+                      {showCommandHelper && (
+                        <div className="flex-1 border-b border-gray-200 dark:border-gray-700">
+                          <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                            <h3 className="font-medium flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                              <Command className="h-4 w-4" />
+                              Command Helper
+                            </h3>
                         </div>
-                        <div className="flex-1 overflow-hidden">
+                          <div className="flex-1 overflow-auto">
                           <InteractiveCommandHelper 
                             repositoryState={repositoryState}
                             onSuggestCommand={handleCommandSuggestion}
@@ -706,26 +836,31 @@ export default function Practice() {
                           />
                         </div>
                       </div>
+                      )}
+
+                      {showExplanations && (
+                        <div className="flex-1">
+                          <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                            <h3 className="font-medium flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                              <Lightbulb className="h-4 w-4" />
+                              Explanations
+                            </h3>
                     </div>
-                    <div className="bg-white dark:bg-gray-800">
-                      <div className="h-full flex flex-col">
-                        <div className="p-3 border-b border-border">
-                          <h4 className="font-medium text-sm">Explanations</h4>
-                        </div>
-                        <div className="flex-1 overflow-hidden">
+                          <div className="flex-1 overflow-auto">
                           <ExplanationPanel 
                             currentCommand={lastCommand}
                             repositoryState={repositoryState}
                           />
                         </div>
                       </div>
+                      )}
                     </div>
-                  </div>
-                </div>
+                  )}
               </div>
             </div>
           </TabsContent>
         </Tabs>
+        </TooltipProvider>
       </div>
     </div>
   );

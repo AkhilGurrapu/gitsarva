@@ -107,8 +107,12 @@ export default function AppHeader({ onToggleMobileSidebar, onStartWalkthrough }:
             </Button>
             
             <div className="flex items-center space-x-2">
-              <div className="flex items-center justify-center h-8 w-8 bg-gradient-to-br from-git-red to-github-blue rounded-lg">
-                <span className="text-white font-bold text-sm">GS</span>
+              <div className="flex items-center justify-center h-8 w-8 rounded-lg overflow-hidden">
+                <img 
+                  src="/datasarva-logo.jpg" 
+                  alt="Datasarva Logo" 
+                  className="w-full h-full object-cover"
+                />
               </div>
               <h1 className="text-xl font-bold text-github-dark dark:text-foreground">
                 GitSarva

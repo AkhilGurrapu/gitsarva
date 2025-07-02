@@ -16,8 +16,12 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
           <div className="text-center">
             <div className="flex items-center justify-center space-x-2 mb-8">
-              <div className="flex items-center justify-center h-16 w-16 bg-gradient-to-br from-git-red to-github-blue rounded-xl">
-                <span className="text-white font-bold text-2xl">GS</span>
+              <div className="flex items-center justify-center h-16 w-16 rounded-xl overflow-hidden">
+                <img 
+                  src="/datasarva-logo.jpg" 
+                  alt="Datasarva Logo" 
+                  className="w-full h-full object-cover"
+                />
               </div>
               <h1 className="text-4xl md:text-6xl font-bold text-github-dark dark:text-foreground">
                 GitSarva

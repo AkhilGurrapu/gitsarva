@@ -2195,7 +2195,7 @@ export default function GitCheatSheet() {
   const [difficultyFilter, setDifficultyFilter] = useState<string>("all");
   const [expandedCommands, setExpandedCommands] = useState<Set<string>>(new Set());
   const [copiedCommand, setCopiedCommand] = useState<string>("");
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
   const { toast } = useToast();
 
   const filteredCommands = useMemo(() => {
@@ -2247,107 +2247,125 @@ export default function GitCheatSheet() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
-      {/* Consistent Header */}
+    <div className="min-h-screen bg-white dark:bg-gray-900">
       <AppHeader 
-        onToggleMobileSidebar={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
+        onToggleMobileSidebar={() => setShowMobileSidebar(!showMobileSidebar)}
+        onStartWalkthrough={() => {}}
       />
 
-      <div className="flex-1 overflow-auto">
-        {/* Hero Header */}
-        <div className="bg-gradient-to-r from-github-blue via-blue-600 to-indigo-600 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-          <div className="text-center space-y-4">
-            <div className="flex justify-center">
-              <div className="p-3 sm:p-4 bg-white/20 rounded-full backdrop-blur-sm">
-                <Terminal className="h-8 w-8 sm:h-12 sm:w-12 text-white" />
+      {/* Mobile Sidebar Overlay */}
+      {showMobileSidebar && (
+        <div className="lg:hidden fixed inset-0 z-50 bg-black/50" onClick={() => setShowMobileSidebar(false)}>
+          <div className="absolute left-0 top-16 bottom-0 w-4/5 max-w-sm bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-transform duration-300" onClick={(e) => e.stopPropagation()}>
+            <div className="p-4">
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-4">Git Cheat Sheet</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                Comprehensive Git command reference with examples and explanations.
+              </p>
+              <div className="space-y-2">
+                <div className="text-sm font-medium text-gray-900 dark:text-gray-100">Quick Navigation</div>
+                <div className="text-xs text-gray-600 dark:text-gray-400">Use the search and filters above to find specific commands.</div>
               </div>
-            </div>
-            <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-white">
-              Interactive Git Cheat Sheet
-            </h1>
-            <p className="text-lg sm:text-xl text-blue-100 max-w-3xl mx-auto leading-relaxed px-4">
-              Master Git with our comprehensive, searchable command reference featuring interactive examples, 
-              beautiful visualizations, and expert tips.
-            </p>
-            <div className="flex flex-wrap justify-center gap-2 sm:gap-4 pt-4">
-              <Badge className="bg-white/20 text-white border-white/30 text-xs sm:text-sm px-3 sm:px-4 py-1 sm:py-2">
-                101+ Commands
-              </Badge>
-              <Badge className="bg-white/20 text-white border-white/30 text-xs sm:text-sm px-3 sm:px-4 py-1 sm:py-2">
-                Interactive Examples
-              </Badge>
-              <Badge className="bg-white/20 text-white border-white/30 text-xs sm:text-sm px-3 sm:px-4 py-1 sm:py-2">
-                Visual Learning
-              </Badge>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* Filters & Search */}
-      <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 sticky top-16 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
-          <div className="space-y-4">
-            {/* Search */}
-            <div className="relative w-full max-w-md mx-auto lg:mx-0">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-gray-400" />
-              <Input
-                placeholder="Search Git commands..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 h-10 sm:h-12 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 focus:border-github-blue dark:focus:border-github-blue text-gray-900 dark:text-gray-100"
-              />
+      <div className="pt-16 min-h-full overflow-auto">
+        {/* Hero Header */}
+        <div className="bg-gradient-to-r from-github-blue via-blue-600 to-indigo-600 text-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+            <div className="text-center space-y-4">
+              <div className="flex justify-center">
+                <div className="p-3 sm:p-4 bg-white/20 rounded-full backdrop-blur-sm">
+                  <Terminal className="h-8 w-8 sm:h-12 sm:w-12 text-white" />
+                </div>
+              </div>
+              <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-white">
+                Interactive Git Cheat Sheet
+              </h1>
+              <p className="text-lg sm:text-xl text-blue-100 max-w-3xl mx-auto leading-relaxed px-4">
+                Master Git with our comprehensive, searchable command reference featuring interactive examples, 
+                beautiful visualizations, and expert tips.
+              </p>
+              <div className="flex flex-wrap justify-center gap-2 sm:gap-4 pt-4">
+                <Badge className="bg-white/20 text-white border-white/30 text-xs sm:text-sm px-3 sm:px-4 py-1 sm:py-2">
+                  101+ Commands
+                </Badge>
+                <Badge className="bg-white/20 text-white border-white/30 text-xs sm:text-sm px-3 sm:px-4 py-1 sm:py-2">
+                  Interactive Examples
+                </Badge>
+                <Badge className="bg-white/20 text-white border-white/30 text-xs sm:text-sm px-3 sm:px-4 py-1 sm:py-2">
+                  Visual Learning
+                </Badge>
+              </div>
             </div>
+          </div>
+        </div>
 
-            {/* Category Filter */}
-            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-              {categories.slice(0, 6).map((category) => {
-                const Icon = category.icon;
-                return (
+        {/* Filters & Search */}
+        <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 sticky top-16 z-40">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
+            <div className="space-y-4">
+              {/* Search */}
+              <div className="relative w-full max-w-md mx-auto lg:mx-0">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-gray-400" />
+                <Input
+                  placeholder="Search Git commands..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 pr-4 h-10 sm:h-12 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 focus:border-github-blue dark:focus:border-github-blue text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                />
+              </div>
+
+              {/* Category Filter */}
+              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                {categories.slice(0, 6).map((category) => {
+                  const Icon = category.icon;
+                  return (
+                    <Button
+                      key={category.name}
+                      variant={selectedCategory === category.name ? "default" : "outline"}
+                      onClick={() => setSelectedCategory(category.name)}
+                      size="sm"
+                      className={`whitespace-nowrap gap-1 sm:gap-2 text-xs sm:text-sm font-medium ${
+                        selectedCategory === category.name 
+                          ? "bg-github-blue hover:bg-github-blue/90 text-white border-github-blue" 
+                          : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
+                      }`}
+                    >
+                      <Icon className="h-3 w-3 sm:h-4 sm:w-4" />
+                      <span className="hidden sm:inline">{category.name}</span>
+                      <span className="sm:hidden">{category.name.split(' ')[0]}</span>
+                      <Badge variant="secondary" className="ml-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-none">
+                        {category.count}
+                      </Badge>
+                    </Button>
+                  );
+                })}
+              </div>
+
+              {/* Difficulty Filter */}
+              <div className="flex gap-2 justify-center lg:justify-start">
+                {["all", "beginner", "intermediate", "advanced"].map((difficulty) => (
                   <Button
-                    key={category.name}
-                    variant={selectedCategory === category.name ? "default" : "outline"}
-                    onClick={() => setSelectedCategory(category.name)}
+                    key={difficulty}
+                    variant={difficultyFilter === difficulty ? "default" : "outline"}
                     size="sm"
-                    className={`whitespace-nowrap gap-1 sm:gap-2 text-xs sm:text-sm ${
-                      selectedCategory === category.name 
+                    onClick={() => setDifficultyFilter(difficulty)}
+                    className={`capitalize text-xs sm:text-sm font-medium ${
+                      difficultyFilter === difficulty 
                         ? "bg-github-blue hover:bg-github-blue/90 text-white border-github-blue" 
                         : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
                     }`}
                   >
-                    <Icon className="h-3 w-3 sm:h-4 sm:w-4" />
-                    <span className="hidden sm:inline">{category.name}</span>
-                    <span className="sm:hidden">{category.name.split(' ')[0]}</span>
-                    <Badge variant="secondary" className="ml-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
-                      {category.count}
-                    </Badge>
+                    {difficulty === "all" ? "All Levels" : difficulty}
                   </Button>
-                );
-              })}
-            </div>
-
-            {/* Difficulty Filter */}
-            <div className="flex gap-2 justify-center lg:justify-start">
-              {["all", "beginner", "intermediate", "advanced"].map((difficulty) => (
-                <Button
-                  key={difficulty}
-                  variant={difficultyFilter === difficulty ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setDifficultyFilter(difficulty)}
-                  className={`capitalize text-xs sm:text-sm ${
-                    difficultyFilter === difficulty 
-                      ? "bg-github-blue hover:bg-github-blue/90 text-white border-github-blue" 
-                      : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
-                  }`}
-                >
-                  {difficulty === "all" ? "All Levels" : difficulty}
-                </Button>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
       {/* Commands Grid - Full Scrollable Area */}
       <div className="flex-1 min-h-0 overflow-y-auto">
@@ -2360,7 +2378,7 @@ export default function GitCheatSheet() {
                     <Search className="h-6 w-6 sm:h-8 sm:w-8 text-gray-500 dark:text-gray-400" />
                   </div>
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">No commands found</h3>
-                <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
+                <p className="text-gray-700 dark:text-gray-400 max-w-md mx-auto font-medium">
                   Try adjusting your search terms or filters to find the Git commands you're looking for.
                 </p>
               </div>
@@ -2397,7 +2415,7 @@ export default function GitCheatSheet() {
                                   </Badge>
                                 )}
                               </div>
-                              <CardDescription className="text-base text-gray-600 dark:text-gray-400">
+                              <CardDescription className="text-base text-gray-800 dark:text-gray-300 font-medium">
                                 {cmd.description}
                               </CardDescription>
                             </div>
@@ -2410,7 +2428,7 @@ export default function GitCheatSheet() {
                                 e.stopPropagation();
                                 copyCommand(cmd.command);
                               }}
-                              className="gap-2"
+                              className="gap-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
                             >
                               {isCopied ? (
                                 <CheckCircle className="h-4 w-4 text-green-600" />
@@ -2473,7 +2491,7 @@ export default function GitCheatSheet() {
                               What it does
                             </h4>
                             <div className="bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                              <p className="text-blue-800 dark:text-blue-200">{cmd.visualization}</p>
+                              <p className="text-blue-900 dark:text-blue-200 font-medium">{cmd.visualization}</p>
                             </div>
                           </div>
                         )}
@@ -2489,7 +2507,7 @@ export default function GitCheatSheet() {
                               {cmd.tips.map((tip, index) => (
                                 <li key={index} className="flex items-start gap-2">
                                   <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2 flex-shrink-0" />
-                                  <span className="text-sm text-gray-700 dark:text-gray-300">{tip}</span>
+                                  <span className="text-sm text-gray-800 dark:text-gray-300 font-medium">{tip}</span>
                                 </li>
                               ))}
                             </ul>
@@ -2504,7 +2522,7 @@ export default function GitCheatSheet() {
                                 <RotateCcw className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
                                 <div>
                                   <h5 className="font-medium text-red-800 dark:text-red-200 mb-1">Caution</h5>
-                                  <p className="text-sm text-red-700 dark:text-red-300">{cmd.warning}</p>
+                                  <p className="text-sm text-red-800 dark:text-red-300 font-medium">{cmd.warning}</p>
                                 </div>
                               </div>
                             </div>
@@ -2523,7 +2541,7 @@ export default function GitCheatSheet() {
                                 <Badge 
                                   key={index} 
                                   variant="outline" 
-                                  className="font-mono cursor-pointer hover:bg-github-blue hover:text-white transition-colors border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300"
+                                  className="font-mono cursor-pointer hover:bg-github-blue hover:text-white transition-colors border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-300 font-medium"
                                   onClick={() => setSearchTerm(relatedCmd)}
                                 >
                                   {relatedCmd}
@@ -2564,9 +2582,7 @@ export default function GitCheatSheet() {
               Practice Sandbox
             </Button>
           </div>
-          </div>
         </div>
-      </div>
       </div>
     </div>
   );
